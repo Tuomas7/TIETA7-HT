@@ -1,8 +1,9 @@
+import java.sql.*;
 
 public class Kayttoliittyma{
 
 
-	public static void main(String[] args){
+	public static void teeAsioita(Connection yhteys){
 
 		System.out.println("       _      _       _                                  __  __");
 		
