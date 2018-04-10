@@ -1,4 +1,5 @@
 import java.util.Scanner;
+import java.sql.*;
 
 public class Kayttoliittyma2{
 
@@ -62,6 +63,13 @@ public class Kayttoliittyma2{
 		username = lukija.nextLine();
 		System.out.println("Syötä salasana: ");
 		password = lukija.nextLine();
+		Yhteys yht = new Yhteys();
+		try{
+			Connection yhteys = yht.uusiYhteys();
+		}catch (SQLException poikkeus){
+			System.out.println("Tapahtui seuraava virhe: " + poikkeus.getMessage());
+		}
+		
 
 		return true;
 	}
