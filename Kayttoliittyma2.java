@@ -56,16 +56,31 @@ public class Kayttoliittyma2{
 
 	public static boolean kirjaudu(Scanner lukija){
 		printBanner();
-		String username ="";
+		int username =0;
 		String password = "";
+
 		System.out.println("Kirjaudutaan sisään käyttäjänä.");
 		System.out.println("Syötä käyttäjätunnus: ");
-		username = lukija.nextLine();
+
+		username = Integer.parseInt(lukija.nextLine());
+
 		System.out.println("Syötä salasana: ");
 		password = lukija.nextLine();
-		Yhteys yht = new Yhteys();
+
+		Yhteys yht = new Yhteys("localhost", 5432, "bookstore", "testuser", "12345");
 		try{
 			Connection yhteys = yht.uusiYhteys();
+			Statement stmt = yhteys.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT kayttajaid FROM kayttaja WHERE salasana ='"+password+"'");
+			while(rs.next()){
+				if(rs.getInt("kayttajaid") == username){
+					System.out.println("täsmää");
+				}else{
+					System.out.println("ei täsmää");
+				}
+			}
+		
+			
 		}catch (SQLException poikkeus){
 			System.out.println("Tapahtui seuraava virhe: " + poikkeus.getMessage());
 		}
