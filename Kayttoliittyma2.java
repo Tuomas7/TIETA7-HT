@@ -15,7 +15,8 @@ public class Kayttoliittyma2{
 
 		System.out.println("\nTervetuloa kirjakauppaan!\nValitse toiminto:\n");
 
-		String syote = "";		
+		String syote = "";	
+		boolean kirjautuminen = false;	
 
 		while(!syote.equals("4")){
 
@@ -37,11 +38,20 @@ public class Kayttoliittyma2{
 				// "Clear screen"
 				System.out.print("\033[H\033[2J");
 				printBanner();
-				Paavalikko.kirjauduKayttajana(lukija);
+				kirjautuminen = Paavalikko.kirjauduKayttajana(lukija);
+				if(kirjautuminen){
+					paavalikko();
+				}
 
 			}else if(syote.equals("2")){
 				System.out.print("\033[H\033[2J");
-				Paavalikko.kirjauduYllapitajana(lukija);
+				kirjautuminen = Paavalikko.kirjauduYllapitajana(lukija);
+				if(kirjautuminen){
+					paavalikko();
+				}	
+			}else if(syote.equals("3")){
+				System.out.print("\033[H\033[2J");
+				Paavalikko.rekisteroidy(lukija);
 			}
 			
 			
@@ -58,8 +68,8 @@ public class Kayttoliittyma2{
 
 
 
-	public static void päävalikko(){
-
+	public static void paavalikko(){
+		System.out.println("jeejee");
 	}
 
 
