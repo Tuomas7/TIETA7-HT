@@ -1,5 +1,5 @@
 import java.util.Scanner;
-
+import java.sql.*;
 
 public class Kayttoliittyma2{
 
@@ -7,6 +7,16 @@ public class Kayttoliittyma2{
 	public static void main(String[] args){
 
 		Scanner lukija = new Scanner(System.in);
+
+		// Luodaan uusi yhteys
+		Connection yhteys = null;
+		Yhteys con = new Yhteys("localhost", 5432, "bookstore", "testuser", "12345");
+		try{
+			yhteys = con.uusiYhteys();
+		}catch(SQLException poikkeus) {
+        	System.out.println("Tapahtui seuraava virhe: " + poikkeus.getMessage());  
+      	}
+		
 
 		// "Clear screen"
 		System.out.print("\033[H\033[2J");
@@ -38,20 +48,20 @@ public class Kayttoliittyma2{
 				// "Clear screen"
 				System.out.print("\033[H\033[2J");
 				printBanner();
-				kirjautuminen = Paavalikko.kirjauduKayttajana(lukija);
+				kirjautuminen = Paavalikko.kirjauduKayttajana(lukija, yhteys);
 				if(kirjautuminen){
 					paavalikko();
 				}
 
 			}else if(syote.equals("2")){
 				System.out.print("\033[H\033[2J");
-				kirjautuminen = Paavalikko.kirjauduYllapitajana(lukija);
+				kirjautuminen = Paavalikko.kirjauduYllapitajana(lukija, yhteys);
 				if(kirjautuminen){
 					paavalikko();
 				}	
 			}else if(syote.equals("3")){
 				System.out.print("\033[H\033[2J");
-				Paavalikko.rekisteroidy(lukija);
+				Paavalikko.rekisteroidy(lukija, yhteys);
 			}
 			
 			

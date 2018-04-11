@@ -34,7 +34,7 @@ public class Yhteys{
 
    	public Connection uusiYhteys() throws SQLException{
    		yhteys = DriverManager.getConnection(this.url, this.kayttaja, this.salasana);
-   		System.out.println("Yhteys luotu");
+   		//System.out.println("Yhteys luotu");
    		return yhteys;
    	}
 }

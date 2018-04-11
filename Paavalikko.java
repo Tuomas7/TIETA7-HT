@@ -2,11 +2,13 @@ import java.sql.*;
 import java.util.Scanner;
 import java.io.Console;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Paavalikko{
 
 
-	public static boolean kirjauduKayttajana(Scanner lukija){
+	public static boolean kirjauduKayttajana(Scanner lukija, Connection yhteys){
 
 		int username =0;
 		String password = "";
@@ -19,9 +21,8 @@ public class Paavalikko{
 		System.out.println("Syötä salasana: ");
 		password = lukija.nextLine();
 
-		Yhteys yht = new Yhteys("localhost", 5432, "bookstore", "testuser", "12345");
+		
 		try{
-			Connection yhteys = yht.uusiYhteys();
 			Statement stmt = yhteys.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT kayttajaid FROM kayttaja WHERE salasana ='"+password+"'");
 		
@@ -43,7 +44,7 @@ public class Paavalikko{
 		
 	}
 
-	public static boolean kirjauduYllapitajana(Scanner lukija){
+	public static boolean kirjauduYllapitajana(Scanner lukija, Connection yhteys){
 
 		int username =0;
 		String password = "";
@@ -54,9 +55,7 @@ public class Paavalikko{
 		System.out.println("Syötä salasana: ");
 		password = lukija.nextLine();
 
-		Yhteys yht = new Yhteys("localhost", 5432, "bookstore", "testuser", "12345");
 		try{
-			Connection yhteys = yht.uusiYhteys();
 			Statement stmt = yhteys.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT kayttajaid FROM kayttaja WHERE salasana ='"+password+"'");
 		
@@ -79,32 +78,64 @@ public class Paavalikko{
 		return false;
 	}
 
-	public static boolean rekisteroidy(Scanner lukija){
+	public static boolean rekisteroidy(Scanner lukija, Connection yhteys){
 
 		Console console = System.console() ;
 		
 		boolean tiedotOK = false;
 
+		HashMap<String,String> tiedot = new HashMap<String,String>();
+
 		while(true){
 
 			String rooli ="Asiakas";
+			tiedot.put("rooli",rooli);
+
 			System.out.println("Luodaan käyttäjätunnus asiakkaalle.");
 			System.out.println("Syötä tiedot, tähdellä merkityt kentät pakollisia:");
 
-			System.out.print("Etunimi (*):\n> ");
-			String etunimi = lukija.nextLine();
+			String etunimi = "";
+			boolean etunimitarkistus = false;
+			while(!etunimitarkistus){
+				System.out.print("Etunimi (*):\n> ");
+				etunimi = lukija.nextLine();
+				etunimitarkistus = tarkastaPituus(etunimi);
+			}
+			// Lisätään nimi mappiin
+			tiedot.put("etunimi",etunimi);
+			
+			String sukunimi ="";
+			boolean sukunimitarkistus = false;
+			while(!sukunimitarkistus){
+				System.out.print("Sukunimi (*):\n> ");
+				sukunimi = lukija.nextLine();
+				sukunimitarkistus = tarkastaPituus(sukunimi);
+			}
+			
+			tiedot.put("sukunimi",sukunimi);
 
-			System.out.print("Sukunimi (*):\n> ");
-			String sukunimi = lukija.nextLine();
+			String osoite = "";
+			boolean osoitetarkistus = false;
+			while(!osoitetarkistus){
+				System.out.print("Osoite (*):\n> ");
+				osoite = lukija.nextLine();
+				osoitetarkistus = tarkastaPituus(osoite);
+			}
 
-			System.out.print("Osoite (*):\n> ");
-			String osoite = lukija.nextLine();
+			tiedot.put("osoite",osoite);
+			
 
 			System.out.print("Sähköposti:\n> ");
 			String sahkoposti = lukija.nextLine();
+			if(sahkoposti.length()>0){
+				tiedot.put("sahkoposti",sahkoposti);
+			}
 
 			System.out.print("Puhelin:\n> ");
 			String puhelin = lukija.nextLine();
+			if(puhelin.length()>0){
+				tiedot.put("puhelin",sahkoposti);
+			}
 
 			System.out.println("Luodaan käyttäjätunnus seuraavin tiedoin.\n");
 			System.out.println("Nimi: "+etunimi + " " + sukunimi);
@@ -116,12 +147,16 @@ public class Paavalikko{
 				System.out.println("Puhelin: "+puhelin+"\n");
 			}
 			
-			System.out.println("Tarkista tiedot. Jos tiedot ovat oikein, jatketaan tunnuksen luomiseen. (K/E)\n\n> ");
-			String kyllaei = lukija.nextLine(); 
+			
+			String varmistus = "";
+			while(!(varmistus.equals("E") || varmistus.equals("K"))){
+				System.out.print("Tarkista tiedot. Jos tiedot ovat oikein, jatketaan tunnuksen luomiseen. (K/E)\n\n> ");
+				varmistus = lukija.nextLine(); 
+			}
 
-			if(kyllaei.equals("E")){
+			if(varmistus.equals("E")){	
 				continue;
-			}else if(kyllaei.equals("K")){
+			}else if(varmistus.equals("K")){
 				System.out.println("Luodaan käyttäjätunnus ja salasana:\n");
 			}
 
@@ -136,11 +171,12 @@ public class Paavalikko{
 					System.out.println("Käyttäjätunnus liian lyhyt. Syötä pidempi käyttäjätunnus.");
 					continue;
 				}
-				if(tarkastaTunnus(ktunnus)){
+				if(tarkastaTunnus(ktunnus, yhteys)){
 					tunnustarkistus = true;
+					tiedot.put("tunnus",ktunnus);
 				}
 				if(!tunnustarkistus){
-					System.out.println("Käyttäjätunnus on varattu, valitse toinen käyttäjätunnus:\n> ");
+					System.out.print("Käyttäjätunnus on varattu, valitse toinen käyttäjätunnus:\n> ");
 				}
 				
 
@@ -152,7 +188,7 @@ public class Paavalikko{
 			char [] password;
 
 			while(!salasanatarkistus){
-				password = console.readPassword("Salasana:\n> ");
+				password = console.readPassword("Valitse salasana (pituus vähintään viisi merkkiä):\n> ");
 
 				StringBuilder strBuilder = new StringBuilder();
 				for (int i = 0; i < password.length; i++) {
@@ -160,9 +196,9 @@ public class Paavalikko{
 					}
 				String pw1 = strBuilder.toString();
 				Arrays.fill(password,' ');
-				System.out.println(pw1);
+				//System.out.println(pw1);
 
-				password = console.readPassword("Anna salasana uudelleen: \n> ");
+				password = console.readPassword("Syötä salasana uudelleen: \n> ");
 				
 				strBuilder = new StringBuilder();
 				for (int i = 0; i < password.length; i++) {
@@ -170,16 +206,18 @@ public class Paavalikko{
 					}
 				String pw2 = strBuilder.toString();
 				Arrays.fill(password,' ');
-				System.out.println(pw2);
+				//System.out.println(pw2);
 
 				if(salasanaTarkistus(pw1,pw2)){
 					salasanatarkistus = true;
+					tiedot.put("salasana",pw1);
 				}
 				if(!salasanatarkistus){
-					System.out.println("\nSalasanat eivät täsmää tai eivät ole laillisia. Anna salasanat uudelleen.");
+					System.out.println("\nSalasanat eivät täsmää tai ovat liian lyhyitä. Anna salasanat uudelleen.");
 				}
 			}
 			// Tähän lisäys kantaan.
+			lisaaKayttaja(tiedot, yhteys);
 			System.out.println("Tunnus luotu onnistuneesti!");
 			return true;
 			
@@ -188,16 +226,23 @@ public class Paavalikko{
 		
 	}
 
-	public static boolean tarkastaTunnus(String tunnus){
+	public static boolean tarkastaPituus(String tieto){
+		if(tieto.length()>0){
+			return true;
+		}
+		System.out.println("Syötit tyhjän arvon!");
+		return false;
 
-		Yhteys yht = new Yhteys("localhost", 5432, "bookstore", "testuser", "12345");
+	}
+
+	public static boolean tarkastaTunnus(String tunnus, Connection yhteys){
+
 		try{
-			Connection yhteys = yht.uusiYhteys();
 			Statement stmt = yhteys.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT nimi FROM kayttaja");
 		
 			while(rs.next()){
-				System.out.println(rs.getString("nimi"));
+				//System.out.println(rs.getString("nimi"));
 				if(rs.getString("nimi").equals(tunnus)){
 					return false;
 				}
@@ -215,6 +260,43 @@ public class Paavalikko{
 			return true;
 		}
 		return false;
+	}
+
+	public static boolean lisaaKayttaja(HashMap<String,String> tiedot, Connection yhteys){
+		for (Map.Entry mappi : tiedot.entrySet()) {
+          System.out.println("Key: "+mappi.getKey() + " & Value: " + mappi.getValue());
+        }
+
+        try{
+        	yhteys.setAutoCommit(false);
+        	Statement stmt = yhteys.createStatement();
+        	//stmt.executeUpdate("INSERT INTO kayttaja VALUES (5,'" + tiedot.get("tunnus") + "', '" + tiedot.get("salasana") + "', '" + tiedot.get("rooli") +"')");
+        	stmt.executeUpdate("INSERT INTO kayttaja VALUES (12,'tsti','testii','Asiakas')");
+        	yhteys.commit();
+         	yhteys.setAutoCommit(true);
+         
+         	// Suljetaan tapahtumaolio
+         	stmt.close();
+
+
+        }catch (SQLException poikkeus){
+			System.out.println("Tapahtui seuraava virhe: " + poikkeus.getMessage());
+
+			try {
+            
+            // Perutaan tapahtuma
+            yhteys.rollback();
+            
+         } catch (SQLException poikkeus2) {
+            System.out.println("Tapahtuman peruutus epäonnistui: " + poikkeus2.getMessage()); 
+         }
+		}
+         
+
+
+
+        return true;
+		
 	}
 
 }	
