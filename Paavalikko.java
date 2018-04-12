@@ -4,6 +4,7 @@ import java.io.Console;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class Paavalikko{
 
@@ -78,7 +79,7 @@ public class Paavalikko{
 		return false;
 	}
 
-	public static boolean rekisteroidy(Scanner lukija, Connection yhteys){
+	public static HashMap<String,String> rekisteroidy(Scanner lukija, Connection yhteys){
 
 		Console console = System.console() ;
 		
@@ -129,12 +130,16 @@ public class Paavalikko{
 			String sahkoposti = lukija.nextLine();
 			if(sahkoposti.length()>0){
 				tiedot.put("sahkoposti",sahkoposti);
+			}else{
+				tiedot.put("sahkoposti","NULL");
 			}
 
 			System.out.print("Puhelin:\n> ");
 			String puhelin = lukija.nextLine();
 			if(puhelin.length()>0){
 				tiedot.put("puhelin",sahkoposti);
+			}else{
+				tiedot.put("puhelin","NULL");
 			}
 
 			System.out.println("Luodaan käyttäjätunnus seuraavin tiedoin.\n");
@@ -163,6 +168,7 @@ public class Paavalikko{
 			// Tähän käyttäjätunnuksen luonti ja tarkistus, että tunnusta ei löydy kannasta
 			boolean tunnustarkistus = false;
 			String ktunnus= "";
+
 			while(!tunnustarkistus){
 				System.out.print("Käyttäjätunnus:\n> ");
 				ktunnus = lukija.nextLine();
@@ -217,9 +223,14 @@ public class Paavalikko{
 				}
 			}
 			// Tähän lisäys kantaan.
-			lisaaKayttaja(tiedot, yhteys);
-			System.out.println("Tunnus luotu onnistuneesti!");
-			return true;
+			if(lisaaKayttaja(tiedot, yhteys)){
+				tiedot.put("kirjautuminen","true");
+				System.out.println("Tunnus luotu onnistuneesti!");
+				return tiedot;
+			}
+			HashMap<String, String> palautus = new HashMap<String,String>();
+			palautus.put("kirjautuminen","false");
+			return palautus;
 			
 			
 		}
@@ -263,21 +274,36 @@ public class Paavalikko{
 	}
 
 	public static boolean lisaaKayttaja(HashMap<String,String> tiedot, Connection yhteys){
+
+		// Luodaan id:
+		int id = 0;
+		while(id == 0){
+			id = luoID(yhteys);
+		}
+		//System.out.println(id);
+
+		/*
 		for (Map.Entry mappi : tiedot.entrySet()) {
           System.out.println("Key: "+mappi.getKey() + " & Value: " + mappi.getValue());
         }
+        */
 
         try{
         	yhteys.setAutoCommit(false);
         	Statement stmt = yhteys.createStatement();
         	//stmt.executeUpdate("INSERT INTO kayttaja VALUES (5,'" + tiedot.get("tunnus") + "', '" + tiedot.get("salasana") + "', '" + tiedot.get("rooli") +"')");
-        	stmt.executeUpdate("INSERT INTO kayttaja VALUES (12,'tsti','testii','Asiakas')");
+        	//GRANT ALL PRIVILEGES ON table asiakas  TO testuser;
+        	//GRANT ALL PRIVILEGES ON table kayttaja  TO testuser;
+        	stmt.executeUpdate("INSERT INTO kayttaja VALUES ('" + id + "','" + tiedot.get("tunnus") +"','" + tiedot.get("salasana") +"','"+ tiedot.get("rooli")+"')");
+        	stmt.executeUpdate("INSERT INTO asiakas VALUES ('" + id + "','" + tiedot.get("etunimi") +"','" + tiedot.get("sukunimi") +"','"+ tiedot.get("osoite")+"','"+tiedot.get("sahkoposti")+"','"+tiedot.get("puhelin")+"')");
+
         	yhteys.commit();
          	yhteys.setAutoCommit(true);
          
          	// Suljetaan tapahtumaolio
          	stmt.close();
 
+         	return true;
 
         }catch (SQLException poikkeus){
 			System.out.println("Tapahtui seuraava virhe: " + poikkeus.getMessage());
@@ -291,12 +317,34 @@ public class Paavalikko{
             System.out.println("Tapahtuman peruutus epäonnistui: " + poikkeus2.getMessage()); 
          }
 		}
-         
+        
 
-
-
-        return true;
+        return false;
 		
+	}
+
+	// Luodaan rekisteröityvälle käyttäjälle uusi ID, jota ei ole vielä tietokannan rekisterissä
+	public static int luoID(Connection yhteys){
+
+		Random rand = new Random();
+		int  n = rand.nextInt(1000) + 1;
+
+		try{
+			Statement stmt = yhteys.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT kayttajaid FROM kayttaja");
+		
+			while(rs.next()){
+				//System.out.println(rs.getString("nimi"));
+				if(rs.getInt("kayttajaid") == n){
+					return 0;
+				}
+			}
+			
+		}catch (SQLException poikkeus){
+			System.out.println("Tapahtui seuraava virhe: " + poikkeus.getMessage());
+		}
+		return n;
+
 	}
 
 }	

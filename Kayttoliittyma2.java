@@ -1,8 +1,11 @@
 import java.util.Scanner;
 import java.sql.*;
+import java.util.Map;
+import java.util.HashMap;
 
 public class Kayttoliittyma2{
 
+	private static final HashMap<String,String> kirjautunutKayttaja = null;
 
 	public static void main(String[] args){
 
@@ -61,7 +64,13 @@ public class Kayttoliittyma2{
 				}	
 			}else if(syote.equals("3")){
 				System.out.print("\033[H\033[2J");
-				Paavalikko.rekisteroidy(lukija, yhteys);
+				HashMap<String,String> tiedot = Paavalikko.rekisteroidy(lukija, yhteys);
+				if(tiedot.get("kirjautuminen").equals("true")){
+					System.out.println("onnistui");
+				}else{
+					System.out.println("ei onnistunut");
+				}
+				
 			}
 			
 			
