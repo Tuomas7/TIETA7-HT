@@ -116,6 +116,15 @@ public class Kayttoliittyma2{
 			System.out.print("\n> ");
 
 			syote = lukija.nextLine();
+
+			if(syote.equals("1")){
+				System.out.println("Haetaan teoksia:");
+				KayttajaTapahtumat.haeTeoksia(lukija);
+			}else if(syote.equals("2")){
+				System.out.println("Valitsit 2");
+			}else if(syote.equals("3")){
+				System.out.println("Valitsit 3");
+			}
 		}
 		System.out.println("Kirjauduit ulos.");
 		
