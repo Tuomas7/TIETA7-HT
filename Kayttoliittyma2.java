@@ -53,12 +53,16 @@ public class Kayttoliittyma2{
 				printBanner();
 				kirjautuminen = Paavalikko.kirjauduKayttajana(lukija, yhteys);
 				if(kirjautuminen){
-					sisaankirjaus(lukija);
+					sisaankirjausKayttaja(lukija);
 				}
 
 			}else if(syote.equals("2")){
 				System.out.print("\033[H\033[2J");
 				kirjautuminen = Paavalikko.kirjauduYllapitajana(lukija, yhteys);
+				if(kirjautuminen){
+					sisaankirjausYllapito(lukija);
+				}
+
 					
 			}else if(syote.equals("3")){
 				System.out.print("\033[H\033[2J");
@@ -68,9 +72,10 @@ public class Kayttoliittyma2{
 				//}
 				
 			}
+				}
 			
 			
-		}
+		
 		printBanner();
 		System.out.print("\033[H\033[2J");
 		printBanner();
@@ -81,9 +86,25 @@ public class Kayttoliittyma2{
 		
 	}
 
+	public static void sisaankirjausYllapito(Scanner lukija){
+
+		String syote ="";
+		while(!syote.equals("4")){
+			System.out.println("Olet kirjautuneena ylläpitäjänä: ");
+			System.out.println("[ 1 ] Lisää teoksia");
+			System.out.println("[ 2 ] Jotain muuta");
+			System.out.println("[ 3 ] Jotain muuta");
+			System.out.println("[ 4 ] Kirjaudu ulos");
+			System.out.print("\n> ");
+
+			syote = lukija.nextLine();
+		}
+		System.out.println("Kirjauduit ulos.");
+	}
 
 
-	public static void sisaankirjaus(Scanner lukija){
+
+	public static void sisaankirjausKayttaja(Scanner lukija){
 
 		String syote ="";
 		while(!syote.equals("4")){

@@ -35,7 +35,7 @@ public class Paavalikko{
 		
 		try{
 			Statement stmt = yhteys.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT nimi FROM kayttaja WHERE salasana ='"+password+"'");
+			ResultSet rs = stmt.executeQuery("SELECT nimi FROM kayttaja WHERE salasana ='"+password+"' AND rooli = 'Asiakas'");
 		
 			while(rs.next()){
 				if(rs.getString("nimi").equals(username)){
@@ -57,26 +57,38 @@ public class Paavalikko{
 
 	public static boolean kirjauduYllapitajana(Scanner lukija, Connection yhteys){
 
-		int username =0;
-		String password = "";
-		System.out.println("Kirjaudutaan sisään ylläpitäjänä.");
-		System.out.println("Syötä käyttäjätunnus: ");
-		username = Integer.parseInt(lukija.nextLine());
+		String username ="";
+		Console console = System.console() ;
 
-		System.out.println("Syötä salasana: ");
-		password = lukija.nextLine();
+		System.out.println("Kirjaudutaan sisään käyttäjänä.");
+		System.out.print("Syötä käyttäjätunnus:\n> ");
 
+		username = lukija.nextLine();
+		char [] salasana;
+
+		
+		salasana = console.readPassword("Anna salasana:\n> ");
+
+		StringBuilder strBuilder = new StringBuilder();
+		for (int i = 0; i < salasana.length; i++) {
+		   	strBuilder.append(salasana[i]);
+			}
+		String password = strBuilder.toString();
+		Arrays.fill(salasana,' ');
+		
+		//System.out.println(password);
+		
 		try{
 			Statement stmt = yhteys.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT kayttajaid FROM kayttaja WHERE salasana ='"+password+"'");
+			ResultSet rs = stmt.executeQuery("SELECT nimi FROM kayttaja WHERE salasana ='"+password+"' AND rooli = 'Ylläpitäjä'");
 		
 			while(rs.next()){
-				if(rs.getInt("kayttajaid") == username){
-					System.out.println("täsmää");
+				if(rs.getString("nimi").equals(username)){
+					//System.out.println("täsmää");
 					return true;
 				}
 			}
-			System.out.println("ei täsmää");
+			System.out.println("Käyttäjätunnus tai salasana väärin.");
 			
 			
 		
@@ -84,8 +96,6 @@ public class Paavalikko{
 		}catch (SQLException poikkeus){
 			System.out.println("Tapahtui seuraava virhe: " + poikkeus.getMessage());
 		}
-		
-
 		return false;
 	}
 
