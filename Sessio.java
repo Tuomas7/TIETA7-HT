@@ -12,13 +12,23 @@ public class Sessio{
 	private HashMap<String,String> ostoskori;
 
 	public Sessio(HashMap<String, String> tiedot){
-		this.id = tiedot.get["id"];
-		this.nimi = tiedot.get["etunimi"] + " " + tiedot.get["sukunimi"];
+		this.id = Integer.parseInt(tiedot.get("id"));
+		this.nimi = tiedot.get("etunimi") + " " + tiedot.get("sukunimi");
 		this.tiedot = tiedot;
 		this.hakuhistoria = new ArrayList<>();
 		this.ostoskori = new HashMap<String,String>();
-		this.saldo = tiedot.get["saldo"];
+		this.saldo = Double.parseDouble(tiedot.get("saldo"));
 	}
+
+	public Sessio(){
+		this.id=0;
+		this.nimi = "";
+		this.tiedot = new HashMap<String,String>();
+		this.hakuhistoria = new ArrayList<>();
+		this.ostoskori = new HashMap<String,String>();
+		this.saldo = 0;
+	}
+
 
 	public String haeNimi(){
 		return this.nimi;

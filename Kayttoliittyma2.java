@@ -10,9 +10,12 @@ public class Kayttoliittyma2{
 	public static void main(String[] args){
 
 		Scanner lukija = new Scanner(System.in);
+		Sessio istunto = null;
 
+		boolean kirjautuminen = false;
 		// Luodaan uusi yhteys
 		Connection yhteys = null;
+
 		Yhteys con = new Yhteys("localhost", 5432, "bookstore", "testuser", "12345");
 		try{
 			yhteys = con.uusiYhteys();
@@ -29,7 +32,7 @@ public class Kayttoliittyma2{
 		System.out.println("\nTervetuloa kirjakauppaan!\nValitse toiminto:\n");
 
 		String syote = "";	
-		boolean kirjautuminen = false;	
+			
 
 		while(!syote.equals("4")){
 
@@ -51,16 +54,16 @@ public class Kayttoliittyma2{
 				// "Clear screen"
 				System.out.print("\033[H\033[2J");
 				printBanner();
-				kirjautuminen = Paavalikko.kirjauduKayttajana(lukija, yhteys);
-				if(kirjautuminen){
-					sisaankirjausKayttaja(lukija);
+				istunto = Paavalikko.kirjaudu(lukija, yhteys, "Asiakas");
+				if(istunto != null){
+					sisaankirjausKayttaja(lukija, istunto);
 				}
 
 			}else if(syote.equals("2")){
 				System.out.print("\033[H\033[2J");
-				kirjautuminen = Paavalikko.kirjauduYllapitajana(lukija, yhteys);
-				if(kirjautuminen){
-					sisaankirjausYllapito(lukija);
+				istunto = Paavalikko.kirjaudu(lukija, yhteys, "Ylläpitäjä");
+				if(istunto !=null){
+					sisaankirjausYllapito(lukija, istunto);
 				}
 
 					
@@ -86,7 +89,10 @@ public class Kayttoliittyma2{
 		
 	}
 
-	public static void sisaankirjausYllapito(Scanner lukija){
+	// Käyttöliittymä sisäänkirjautuneelle ylläpitäjälle
+	// @param lukija // Scanner-olio
+	// @param istunto // Sessio-olio
+	public static void sisaankirjausYllapito(Scanner lukija, Sessio istunto){
 
 		String syote ="";
 		while(!syote.equals("4")){
@@ -103,8 +109,10 @@ public class Kayttoliittyma2{
 	}
 
 
-
-	public static void sisaankirjausKayttaja(Scanner lukija){
+	// Käyttöliittymä sisäänkirjautuneelle asiakkaalle
+	// @param lukija // Scanner-olio
+	// @param istunto // Sessio-olio
+	public static void sisaankirjausKayttaja(Scanner lukija, Sessio istunto){
 
 		String syote ="";
 		while(!syote.equals("4")){

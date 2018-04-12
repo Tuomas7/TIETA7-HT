@@ -8,14 +8,18 @@ import java.util.Random;
 
 public class Paavalikko{
 
+	// Funktio kirjautumiseen
+	// @param lukija // Scanner-olio
+	// @param yhteys // Connection-olio
+	// @param rooli // merkkijono kayttajan roolista ("Asiakas" tai "Ylläpitäjä")
+	// @return 
+	public static Sessio kirjaudu(Scanner lukija, Connection yhteys, String rooli){
 
-	public static boolean kirjauduKayttajana(Scanner lukija, Connection yhteys){
-
-
+		Sessio istunto = null;
 		String username ="";
 		Console console = System.console() ;
 
-		System.out.println("Kirjaudutaan sisään käyttäjänä.");
+		System.out.println("Kirjataan sisään: "+rooli);
 		System.out.print("Syötä käyttäjätunnus:\n> ");
 
 		username = lukija.nextLine();
@@ -35,12 +39,14 @@ public class Paavalikko{
 		
 		try{
 			Statement stmt = yhteys.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT nimi FROM kayttaja WHERE salasana ='"+password+"' AND rooli = 'Asiakas'");
+			ResultSet rs = stmt.executeQuery("SELECT nimi FROM kayttaja WHERE salasana ='"+password+"' AND rooli = '"+rooli+"'");
 		
 			while(rs.next()){
+
+				// Kannassa oleva käyttäjätunnus täsmää annettuun
 				if(rs.getString("nimi").equals(username)){
-					//System.out.println("täsmää");
-					return true;
+					istunto = new Sessio();
+					return istunto;
 				}
 			}
 			System.out.println("Käyttäjätunnus tai salasana väärin.");
@@ -51,53 +57,9 @@ public class Paavalikko{
 		}catch (SQLException poikkeus){
 			System.out.println("Tapahtui seuraava virhe: " + poikkeus.getMessage());
 		}
-		return false;
-		
+		return istunto;	
 	}
 
-	public static boolean kirjauduYllapitajana(Scanner lukija, Connection yhteys){
-
-		String username ="";
-		Console console = System.console() ;
-
-		System.out.println("Kirjaudutaan sisään käyttäjänä.");
-		System.out.print("Syötä käyttäjätunnus:\n> ");
-
-		username = lukija.nextLine();
-		char [] salasana;
-
-		
-		salasana = console.readPassword("Anna salasana:\n> ");
-
-		StringBuilder strBuilder = new StringBuilder();
-		for (int i = 0; i < salasana.length; i++) {
-		   	strBuilder.append(salasana[i]);
-			}
-		String password = strBuilder.toString();
-		Arrays.fill(salasana,' ');
-		
-		//System.out.println(password);
-		
-		try{
-			Statement stmt = yhteys.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT nimi FROM kayttaja WHERE salasana ='"+password+"' AND rooli = 'Ylläpitäjä'");
-		
-			while(rs.next()){
-				if(rs.getString("nimi").equals(username)){
-					//System.out.println("täsmää");
-					return true;
-				}
-			}
-			System.out.println("Käyttäjätunnus tai salasana väärin.");
-			
-			
-		
-			
-		}catch (SQLException poikkeus){
-			System.out.println("Tapahtui seuraava virhe: " + poikkeus.getMessage());
-		}
-		return false;
-	}
 
 	public static boolean rekisteroidy(Scanner lukija, Connection yhteys){
 
