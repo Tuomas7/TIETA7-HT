@@ -53,23 +53,19 @@ public class Kayttoliittyma2{
 				printBanner();
 				kirjautuminen = Paavalikko.kirjauduKayttajana(lukija, yhteys);
 				if(kirjautuminen){
-					paavalikko();
+					sisaankirjaus(lukija);
 				}
 
 			}else if(syote.equals("2")){
 				System.out.print("\033[H\033[2J");
 				kirjautuminen = Paavalikko.kirjauduYllapitajana(lukija, yhteys);
-				if(kirjautuminen){
-					paavalikko();
-				}	
+					
 			}else if(syote.equals("3")){
 				System.out.print("\033[H\033[2J");
-				HashMap<String,String> tiedot = Paavalikko.rekisteroidy(lukija, yhteys);
-				if(tiedot.get("kirjautuminen").equals("true")){
-					System.out.println("onnistui");
-				}else{
-					System.out.println("ei onnistunut");
-				}
+				kirjautuminen = Paavalikko.rekisteroidy(lukija, yhteys);
+				//if(kirjautuminen){
+
+				//}
 				
 			}
 			
@@ -87,8 +83,21 @@ public class Kayttoliittyma2{
 
 
 
-	public static void paavalikko(){
-		System.out.println("jeejee");
+	public static void sisaankirjaus(Scanner lukija){
+
+		String syote ="";
+		while(!syote.equals("4")){
+			System.out.println("Olet kirjautuneena käyttäjänä: ");
+			System.out.println("[ 1 ] Hae teoksia");
+			System.out.println("[ 2 ] Jotain muuta");
+			System.out.println("[ 3 ] Jotain muuta");
+			System.out.println("[ 4 ] Kirjaudu ulos");
+			System.out.print("\n> ");
+
+			syote = lukija.nextLine();
+		}
+		System.out.println("Kirjauduit ulos.");
+		
 	}
 
 

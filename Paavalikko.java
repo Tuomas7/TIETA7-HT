@@ -11,29 +11,39 @@ public class Paavalikko{
 
 	public static boolean kirjauduKayttajana(Scanner lukija, Connection yhteys){
 
-		int username =0;
-		String password = "";
+
+		String username ="";
+		Console console = System.console() ;
 
 		System.out.println("Kirjaudutaan sisään käyttäjänä.");
-		System.out.println("Syötä käyttäjätunnus: ");
+		System.out.print("Syötä käyttäjätunnus:\n> ");
 
-		username = Integer.parseInt(lukija.nextLine());
+		username = lukija.nextLine();
+		char [] salasana;
 
-		System.out.println("Syötä salasana: ");
-		password = lukija.nextLine();
+		
+		salasana = console.readPassword("Anna salasana:\n> ");
 
+		StringBuilder strBuilder = new StringBuilder();
+		for (int i = 0; i < salasana.length; i++) {
+		   	strBuilder.append(salasana[i]);
+			}
+		String password = strBuilder.toString();
+		Arrays.fill(salasana,' ');
+		
+		//System.out.println(password);
 		
 		try{
 			Statement stmt = yhteys.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT kayttajaid FROM kayttaja WHERE salasana ='"+password+"'");
+			ResultSet rs = stmt.executeQuery("SELECT nimi FROM kayttaja WHERE salasana ='"+password+"'");
 		
 			while(rs.next()){
-				if(rs.getInt("kayttajaid") == username){
-					System.out.println("täsmää");
+				if(rs.getString("nimi").equals(username)){
+					//System.out.println("täsmää");
 					return true;
 				}
 			}
-			System.out.println("ei täsmää");
+			System.out.println("Käyttäjätunnus tai salasana väärin.");
 			
 			
 		
@@ -79,9 +89,9 @@ public class Paavalikko{
 		return false;
 	}
 
-	public static HashMap<String,String> rekisteroidy(Scanner lukija, Connection yhteys){
+	public static boolean rekisteroidy(Scanner lukija, Connection yhteys){
 
-		Console console = System.console() ;
+		Console console = System.console();
 		
 		boolean tiedotOK = false;
 
@@ -224,13 +234,12 @@ public class Paavalikko{
 			}
 			// Tähän lisäys kantaan.
 			if(lisaaKayttaja(tiedot, yhteys)){
-				tiedot.put("kirjautuminen","true");
 				System.out.println("Tunnus luotu onnistuneesti!");
-				return tiedot;
+				System.out.println("Voit nyt kirjautua sisään.");
+				return true;
 			}
-			HashMap<String, String> palautus = new HashMap<String,String>();
-			palautus.put("kirjautuminen","false");
-			return palautus;
+			
+			return false;
 			
 			
 		}
