@@ -39,13 +39,13 @@ public class Paavalikko{
 		
 		try{
 			Statement stmt = yhteys.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT nimi FROM kayttaja WHERE salasana ='"+password+"' AND rooli = '"+rooli+"'");
+			ResultSet rs = stmt.executeQuery("SELECT nimi,kayttajaid FROM kayttaja WHERE salasana ='"+password+"' AND rooli = '"+rooli+"'");
 		
 			while(rs.next()){
 
 				// Kannassa oleva käyttäjätunnus täsmää annettuun
 				if(rs.getString("nimi").equals(username)){
-					istunto = new Sessio();
+					istunto = new Sessio(yhteys, rs.getInt("kayttajaid"));
 					return istunto;
 				}
 			}

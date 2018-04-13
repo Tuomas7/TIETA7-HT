@@ -55,6 +55,8 @@ public class Kayttoliittyma2{
 				System.out.print("\033[H\033[2J");
 				printBanner();
 				istunto = Paavalikko.kirjaudu(lukija, yhteys, "Asiakas");
+				System.out.println(istunto.haeNimi());
+
 				if(istunto != null){
 					sisaankirjausKayttaja(lukija, istunto);
 				}
@@ -115,21 +117,23 @@ public class Kayttoliittyma2{
 	public static void sisaankirjausKayttaja(Scanner lukija, Sessio istunto){
 
 		String syote ="";
-		while(!syote.equals("4")){
-			System.out.println("Olet kirjautuneena käyttäjänä: ");
+		while(!syote.equals("5")){
+			System.out.println("Olet kirjautuneena käyttäjänä: "+istunto.haeNimi()+"\n");
 			System.out.println("[ 1 ] Hae teoksia");
-			System.out.println("[ 2 ] Jotain muuta");
-			System.out.println("[ 3 ] Jotain muuta");
-			System.out.println("[ 4 ] Kirjaudu ulos");
+			System.out.println("[ 2 ] Profiili");
+			System.out.println("[ 3 ] Hae teoksia");
+			System.out.println("[ 4 ] Tulosta hakuhistoria");
+			System.out.println("[ 5 ] Kirjaudu ulos");
 			System.out.print("\n> ");
 
 			syote = lukija.nextLine();
 
 			if(syote.equals("1")){
 				System.out.println("Haetaan teoksia:");
-				KayttajaTapahtumat.haeTeoksia(lukija);
+				KayttajaTapahtumat.haeTeoksia(lukija, istunto);
+
 			}else if(syote.equals("2")){
-				System.out.println("Valitsit 2");
+				istunto.tulostaTiedot();
 			}else if(syote.equals("3")){
 				System.out.println("Valitsit 3");
 			}
