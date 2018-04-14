@@ -10,7 +10,7 @@ public class Kyselytesti{
 
       	Kyselyt kysely = new Kyselyt();
 
-      	kyselytulos = kysely.haeKayttajaTiedot(1);
+      	kyselytulos = kysely.haeKayttajanTiedot(1);
 
       	System.out.println(kyselytulos.get("nimi"));
       	System.out.println(kyselytulos.get("salasana"));

@@ -8,7 +8,7 @@ public class Kyselyt{
 	private Connection connection;
 	private ResultSet resultset;
 	private PreparedStatement preparedStatement;
-	private String haeKayttajaTiedot;
+	private String haeKayttajaTiedotStatement;
 	private HashMap<String, String> kyselyTulos;
 
 	// Kontruktori, asetetaan prepared statementtien rungot
@@ -18,34 +18,65 @@ public class Kyselyt{
 		this.resultset = null;
 		this.preparedStatement = null;
 		
-		this.haeKayttajaTiedot = "SELECT nimi,kayttajaid,salasana,rooli FROM kayttaja WHERE kayttajaid = ?";
+		this.haeKayttajaTiedotStatement = "SELECT nimi,kayttajaid,salasana,rooli FROM kayttaja WHERE kayttajaid = ?";
 	}
 
-	// Metodi palauttaa rs.objektin
-	public HashMap<String,String> haeKayttajaTiedot(int id){
+	// Metodi, jota kutsutaan käyttöliittymästä
+	public HashMap<String,String> haeKayttajanTiedot(int id){
+		String moodi = "haetiedot";
+		this.yhteysHandleri(id,moodi);
+		return this.kyselyTulos;
+	}
+
+	// "Yhteinen hteyshandleri kyselyille, joka hoitaa yhteyksien avaamiset ja sulkemiset"
+	// kyselyntulokset tallennetaan hashmappiin, joka attribuuttina
+	private void yhteysHandleri(int id,String hakumoodi){
 
 		this.kyselyTulos = new HashMap<String,String>();
 
 		try{
 			this.connection = this.yhteys.uusiYhteys();
-			this.preparedStatement = this.connection.prepareStatement(this.haeKayttajaTiedot);
-			this.preparedStatement.setInt(1,id);
-			this.resultset = this.preparedStatement.executeQuery();
-
-			while(this.resultset.next()){
-				this.kyselyTulos.put("nimi",this.resultset.getString("nimi"));
-				this.kyselyTulos.put("salasana",this.resultset.getString("salasana"));
-				this.kyselyTulos.put("rooli",this.resultset.getString("rooli"));
-			}
 			
+			// tässä kohtaa kutsutaan privaattia kyselyfunktiota
+			if(hakumoodi.equals("haetiedot")){
+				this.kayttajanTiedot(id);
+			}
+	
 
 		}catch(SQLException poikkeus) {
         	System.out.println("Tapahtui seuraava virhe: " + poikkeus.getMessage());  
-      	}
-      	return this.kyselyTulos;
-		
-	}
 
+      	}finally {
+    		if (this.resultset != null) {
+        		try {
+            		this.resultset.close();
+        		} catch (SQLException e) { /* ignored */}
+    		}
+    		if (this.preparedStatement != null) {
+        		try {
+            		this.preparedStatement.close();
+        		} catch (SQLException e) { /* ignored */}
+    		}
+    		if (this.connection != null) {
+        		try {
+            		this.connection.close();
+        		} catch (SQLException e) { /* ignored */}
+    		}
+		}
+	}
+	
+	private void kayttajanTiedot(int id) throws SQLException{
+		this.preparedStatement = this.connection.prepareStatement(this.haeKayttajaTiedotStatement);
+		this.preparedStatement.setInt(1,id);
+		this.resultset = this.preparedStatement.executeQuery();
+
+		while(this.resultset.next()){
+			this.kyselyTulos.put("nimi",this.resultset.getString("nimi"));
+			this.kyselyTulos.put("salasana",this.resultset.getString("salasana"));
+			this.kyselyTulos.put("rooli",this.resultset.getString("rooli"));
+		}
+
+	}
 	
 }
 
