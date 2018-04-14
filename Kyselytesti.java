@@ -16,7 +16,11 @@ public class Kyselytesti{
       	System.out.println(kyselytulos.get("salasana"));
       	System.out.println(kyselytulos.get("rooli"));
 
+      	int id = kysely.luoID();
+      	System.out.println(id);
 
+      	boolean kirjautuminen = kysely.tarkastaKirjautuminen("ecoor1","asdasdada");
+      	System.out.println(kirjautuminen);
 	}
 
 
