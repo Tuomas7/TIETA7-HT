@@ -163,8 +163,8 @@ public class Tapahtumat{
          stmt.executeUpdate("UPDATE keskus.TeosKappale SET Vapaus='Varattu' WHERE KappaleID=" + kappaleID);
                
          // Haetaan kappaleen omistavan alkuperäisen divarin ID
-         ResultSet rset2 = stmt.executeQuery("SELECT DivariID FROM keskus.sijainti WHERE KappaleID=" + kappaleID);
-         int divariID = rset2.getInt(1);
+         ResultSet rset = stmt.executeQuery("SELECT DivariID FROM keskus.sijainti WHERE KappaleID=" + kappaleID);
+         int divariID = rset.getInt(1);
          
          // Jos divari on jokin muu kuin keskustietokanta, asetetaan kappale varatuksi myös siellä
          if (divariID != 2) {
@@ -229,9 +229,9 @@ public class Tapahtumat{
          System.out.println();
             
          while (rset.next()) {
-           System.out.println(rset.getString(1));
-           teosKappaleet.push(rset.getInt(3));
-           kokoPaino += rset.getInt(2);
+            System.out.println(rset.getString(1));
+            teosKappaleet.push(rset.getInt(3));
+            kokoPaino += rset.getInt(2);
          }
          
          // Tilauserien lukumäärä
@@ -349,4 +349,56 @@ public class Tapahtumat{
          }
       }
    }
+   
+   /* Tapahtuma 7
+    * Kuvaus: Siirretään uusien teosten tiedot divarista D1 keskustietokantaan
+    * Rooli: Divarin D1 ylläpitäjä
+    */
+   public static void paivitaKeskustietokanta(Connection yhteys) {
+   
+      try {
+   
+         yhteys.setAutoCommit(false);
+   
+         // Luodaan tapahtumaolio
+         Statement stmt = yhteys.createStatement();
+      
+         // Siirretään kaikki teosten yleiset tiedot keskustietokantaan, jos niitä ei vielä ole siellä
+         stmt.executeUpdate("INSERT INTO keskus.Teos SELECT * FROM D1.Teos ON CONFLICT DO NOTHING");
+      
+         // Tehdään sama myös yksittäisten kappaleiden tiedoilla
+         stmt.executeUpdate("INSERT INTO keskus.TeosKappale SELECT * FROM D1.TeosKappale ON CONFLICT DO NOTHING");
+      
+         // Haetaan kaikki kappaleIDt, joita ei löydy sijaintitaulusta
+         ResultSet rset = stmt.executeQuery("SELECT TeosKappale.KappaleID FROM keskus.TeosKappale "
+            + "NATURAL LEFT JOIN keskus.Sijainti WHERE Sijainti.KappaleID IS NULL");
+      
+         // Lisätään puuttuvat KappaleIDt sijaintitauluun
+         while (rset.next()) {
+            stmt.executeUpdate("INSERT INTO keskus.Sijainti VALUES ('1', '" + rset.getInt(1) + "')");
+         }
+      
+         System.out.println("Tiedot päivitetty keskustietokantaan onnnistuneesti!");
+         
+         // Sitoudutaan muutoksiin
+         yhteys.commit();
+         yhteys.setAutoCommit(true);
+         
+         // Suljetaan tapahtumaolio
+         stmt.close();
+         
+      } catch (SQLException poikkeus) {
+         
+         System.out.println("Tietojen päivitys epäonnistui: " + poikkeus.getMessage());  
+         
+         try {
+            
+            // Perutaan tapahtuma
+            yhteys.rollback();
+            
+         } catch (SQLException poikkeus2) {
+            System.out.println("Tapahtuman peruutus epäonnistui: " + poikkeus2.getMessage()); 
+         }
+      }
+	}
 }
