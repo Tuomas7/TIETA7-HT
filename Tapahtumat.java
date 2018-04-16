@@ -117,6 +117,9 @@ public class Tapahtumat{
          stmt.executeUpdate("INSERT INTO keskus.TeosKappale VALUES ('" + id + "', '" + isbn + "', '"
             + hinta + "', '" + ostohinta + "', null, 'Vapaa')");
       
+         // Lisätään kappaleen tunnus myös sijaintitauluun
+         stmt.executeUpdate("INSERT INTO keskus.Sijainti VALUES ('2', '" + id + "')");
+      
          System.out.println("Tiedot lisätty onnnistuneesti!");
          
          // Sitoudutaan muutoksiin
@@ -156,30 +159,17 @@ public class Tapahtumat{
          // Luodaan tapahtumaolio
          Statement stmt = yhteys.createStatement();
          
-         // Haetaan kirjan omistavan divarin id 
-         ResultSet rset = stmt.executeQuery("SELECT DivariID FROM keskus.sijainti"
-            + "WHERE KappaleID=" + kappaleID);
+         // Asetetaan keskusdivarissa oleva kappale varatuksi
+         stmt.executeUpdate("UPDATE keskus.TeosKappale SET Vapaus='Varattu' WHERE KappaleID=" + kappaleID);
+               
+         // Haetaan kappaleen omistavan alkuperäisen divarin ID
+         ResultSet rset2 = stmt.executeQuery("SELECT DivariID FROM keskus.sijainti WHERE KappaleID=" + kappaleID);
+         int divariID = rset2.getInt(1);
          
-         int divariID = rset.getInt(1);
-         String divari = "";
-         
-         // Päätellään divarin nimi tietokannassa
-         if (divariID == 1) {
-            divari = "D1";
+         // Jos divari on jokin muu kuin keskustietokanta, asetetaan kappale varatuksi myös siellä
+         if (divariID != 2) {
+            stmt.executeUpdate("UPDATE D" + divariID + ".TeosKappale SET Vapaus='Varattu' WHERE KappaleID=" + kappaleID);
          }
-         else if (divariID == 3) {
-            divari = "D3";
-         }
-         else if (divariID == 4) {
-            divari = "D4";
-         }
-         else {
-            divari = "keskus";
-         }
-      
-         // Asetetaan teos varatuksi
-         stmt.executeUpdate("UPDATE " + divari + ".TeosKappale SET Vapaus='Varattu'"
-            + "WHERE KappaleID=" + kappaleID);
       
          // Luodaan uusi käynnissä oleva tilaus (vastaa kappaleen siirtämistä "ostoskoriin")
          stmt.executeUpdate("INSERT INTO keskus.Tilaus VALUES ('" + divariID + "', '"
@@ -240,8 +230,8 @@ public class Tapahtumat{
             
          while (rset.next()) {
            System.out.println(rset.getString(1));
-           teosKappaleet.push(rset.getInt(2));
-           kokoPaino += rset.getInt(3);
+           teosKappaleet.push(rset.getInt(3));
+           kokoPaino += rset.getInt(2);
          }
          
          // Tilauserien lukumäärä
@@ -291,34 +281,51 @@ public class Tapahtumat{
          Scanner scanner = new Scanner(System.in);
          char valinta = scanner.next().charAt(0);
          
-         // Jatketaan, jos asiakas syöttää k:n. Kaikki muut syötteet peruvat tapahtuman
-         if (valinta == 'k' || valinta == 'K') {
+         // Kysytään valintaa niin kauan, että asiakas syöttää k:n tai e:n
+         while (valinta != 'k' && valinta != 'K' && valinta != 'e' && valinta != 'E') {
+            System.out.println("Virheellinen valinta. Syötä joko k tai e:");
+            valinta = scanner.next().charAt(0);
+         }
             
-            // Käydään läpi kaikki ostoskorissa olevat teoskappaleet
-            while (!(teosKappaleet.isEmpty())) {
-               
-               int kappaleID = teosKappaleet.pop();
-               
-               // Asetetaan tilaus suoritetuksi
-               stmt.executeUpdate("UPDATE keskus.Tilaus SET Tila='Suoritettu' WHERE KappaleID=" + kappaleID);
-               
-               // Asetetaan keskusdivarissa oleva kappale myydyksi
-               stmt.executeUpdate("UPDATE keskus.TeosKappale SET Vapaus='Myyty' WHERE KappaleID=" + kappaleID);
-               
-               // Haetaan kappaleen omistavan alkuperäisen divarin ID
-               ResultSet rset2 = stmt.executeQuery("SELECT DivariID FROM keskus.sijainti WHERE KappaleID=" + kappaleID);
-               int divariID = rset2.getInt(1);
+         String tila = "";
+         String vapaus = "";
          
-               // Jos divari on jokin muu kuin keskustietokanta, asetetaan kappale myydyksi myös siellä
-               if (divariID != 2) {
-                  stmt.executeUpdate("UPDATE D" + divariID + ".TeosKappale SET Vapaus='Myyty' WHERE KappaleID=" + kappaleID);
-               }
-            }
+         // Asetetaan teosten tila ja vapaus valinnan perusteella
+         if (valinta == 'k' || valinta == 'K') {
+            tila = "Suoritettu";
+            vapaus = "Myyty";
+         }
+         else {
+            tila = "Peruutettu";
+            vapaus = "Vapaa";
+         }
             
+         // Käydään läpi kaikki ostoskorissa olevat teoskappaleet
+         while (!(teosKappaleet.isEmpty())) {
+               
+            int kappaleID = teosKappaleet.pop();
+               
+            // Asetetaan tilaus suoritetuksi/peruutetuksi
+            stmt.executeUpdate("UPDATE keskus.Tilaus SET Tila='" + tila + "' WHERE KappaleID=" + kappaleID);
+               
+            // Asetetaan keskusdivarissa oleva kappale myydyksi/vapaaksi
+            stmt.executeUpdate("UPDATE keskus.TeosKappale SET Vapaus='" + vapaus + "' WHERE KappaleID=" + kappaleID);
+               
+            // Haetaan kappaleen omistavan alkuperäisen divarin ID
+            ResultSet rset2 = stmt.executeQuery("SELECT DivariID FROM keskus.sijainti WHERE KappaleID=" + kappaleID);
+            int divariID = rset2.getInt(1);
+         
+            // Jos divari on jokin muu kuin keskustietokanta, asetetaan kappale myydyksi/vapaaksi myös siellä
+            if (divariID != 2) {
+               stmt.executeUpdate("UPDATE D" + divariID + ".TeosKappale SET Vapaus='" + vapaus + "' WHERE KappaleID=" + kappaleID);
+            }
+         }
+            
+         if (valinta == 'k' || valinta == 'K') {
             System.out.println("Tilaus suoritettu onnistuneesti!");
          }
          else {
-            System.out.println("Tilaus peruttu");
+            System.out.println("Tilaus peruutettu!");
          }
          
          // Sitoudutaan muutoksiin
