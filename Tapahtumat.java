@@ -1,6 +1,11 @@
 import java.sql.*;
 import java.util.Scanner;
 import java.util.Stack;
+import java.io.IOException;
+import javax.xml.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 public class Tapahtumat{
 
@@ -166,8 +171,8 @@ public class Tapahtumat{
          ResultSet rset = stmt.executeQuery("SELECT DivariID FROM keskus.sijainti WHERE KappaleID=" + kappaleID);
          int divariID = rset.getInt(1);
          
-         // Jos divari on jokin muu kuin keskustietokanta, asetetaan kappale varatuksi myös siellä
-         if (divariID != 2) {
+         // Jos divari ei kuulu keskustietokantaan, asetetaan kappale varatuksi myös siellä
+         if (divariID != 2 && divariID != 4) {
             stmt.executeUpdate("UPDATE D" + divariID + ".TeosKappale SET Vapaus='Varattu' WHERE KappaleID=" + kappaleID);
          }
       
@@ -315,8 +320,8 @@ public class Tapahtumat{
             ResultSet rset2 = stmt.executeQuery("SELECT DivariID FROM keskus.sijainti WHERE KappaleID=" + kappaleID);
             int divariID = rset2.getInt(1);
          
-            // Jos divari on jokin muu kuin keskustietokanta, asetetaan kappale myydyksi/vapaaksi myös siellä
-            if (divariID != 2) {
+            // Jos divari ei kuulu keskustietokantaan, asetetaan kappale myydyksi/vapaaksi myös siellä
+            if (divariID != 2 && divariID != 4) {
                stmt.executeUpdate("UPDATE D" + divariID + ".TeosKappale SET Vapaus='" + vapaus + "' WHERE KappaleID=" + kappaleID);
             }
          }
@@ -391,6 +396,57 @@ public class Tapahtumat{
          
          System.out.println("Tietojen päivitys epäonnistui: " + poikkeus.getMessage());  
          
+         try {
+            
+            // Perutaan tapahtuma
+            yhteys.rollback();
+            
+         } catch (SQLException poikkeus2) {
+            System.out.println("Tapahtuman peruutus epäonnistui: " + poikkeus2.getMessage()); 
+         }
+      }
+	}
+   
+   /* Tapahtuma 8
+    * Kuvaus: Siirretään divarin D4 XML-muotoinen data keskustietokantaan
+    * Rooli: Keskusdivarin ylläpitäjä
+    */
+   public static void siirraXMLdata(Connection yhteys) {
+   
+      // Työkaluja XML-tiedoston käsittelyä varten
+      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      factory.setNamespaceAware(true);
+      DocumentBuilder builder;
+      Document doc = null;
+      
+      try {
+         
+         yhteys.setAutoCommit(false);
+   
+         // Luodaan tapahtumaolio
+         Statement stmt = yhteys.createStatement();
+         
+         // Haetaan XML-dokumentti muuttujaan
+         builder = factory.newDocumentBuilder();
+         doc = builder.parse("XML-data.xml");
+
+         // Luodaan Xpath-olio yksittäisten tietojen noutamista varten
+         XPathFactory xpathFactory = XPathFactory.newInstance();
+         XPath xpath = xpathFactory.newXPath();
+         
+         // Tämä kohta on vielä vähän auki...
+   
+         // Sitoudutaan muutoksiin
+         yhteys.commit();
+         yhteys.setAutoCommit(true);
+         
+         // Suljetaan tapahtumaolio
+         stmt.close();
+         
+      } catch (ParserConfigurationException | SAXException | IOException | SQLException poikkeus) {
+         
+         System.out.println("XML-datan lukeminen epäonnistui: " + poikkeus.getMessage());  
+
          try {
             
             // Perutaan tapahtuma
