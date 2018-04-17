@@ -2,6 +2,7 @@ import java.sql.*;
 import java.util.Random;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.Stack;
 
 public class Asiakaskyselyt{
 
@@ -32,6 +33,7 @@ public class Asiakaskyselyt{
 	private String yksittainendivariVaraus;
 	private String lisaaVaraus;
 	private String haeVaraukset;
+	private String tilaaTuotteet;
 
 	// Tietorakenteet, joihin tallennetaan kyselyiden tuloksia luokan sisällä ja joita luokan metodit palauttavat
 	private HashMap<String, String> kyselyMap;
@@ -83,6 +85,10 @@ public class Asiakaskyselyt{
 		this.lisaaVaraus = "INSERT INTO keskus.Tilaus VALUES (?, ?, ?', 'Käynnissä')";
 
 		this.haeVaraukset = "SELECT kappaleid, DivariID, isbn, hinta, nimi, tekija, vuosi, tyyppi, luokka, paino FROM tilaus NATURAL JOIN teoskappale NATURAL JOIN teos WHERE asiakasid = ? AND tila = 'Kaynnissa'";
+
+		// Tilaus statement
+		this.tilaaTuotteet = "";
+
 	}
 	public void asetaID(int id){
 		this.asiakasID = id;
@@ -228,7 +234,14 @@ public class Asiakaskyselyt{
 		}catch(SQLException poikkeus) {
         	System.out.println("Tapahtui seuraava virhe: " + poikkeus.getMessage());  
         	// Tähän iffeillä kullekin omat virheet?
-
+        	try {
+            
+	            // Perutaan tapahtuma
+	            this.connection.rollback();
+            
+         	} catch (SQLException poikkeus2) {
+            	System.out.println("Tapahtuman peruutus epäonnistui: " + poikkeus2.getMessage()); 
+         	}
       	}finally {
     		if (this.resultset != null) {
         		try {
@@ -411,14 +424,21 @@ public class Asiakaskyselyt{
 		}
 	}
 
+	/* Tapahtumat 4 & 5 (varausvaihe)
+    * Kuvaus: Varataan yksittäinen kappale ja lisätään se "ostoskoriin"
+    * Rooli: Asiakas
+    * Parametrit: yhteys, tilausta tekevän asiakkaan sessio, tilattavan kappaleen ID
+    */
 	public void varauksenLisays() throws SQLException{
 
-		// Varaus keskuskantaan
+		this.connection.setAutoCommit(false);
+
+		// Asetetaan keskusdivarissa oleva kappale varatuksi
 		this.preparedStatement = this.connection.prepareStatement(this.keskusdivariVaraus);
 		this.preparedStatement.setInt(1,this.paramInt);
 		this.preparedStatement.executeUpdate();
 
-		// Hae divariId
+		// Haetaan kappaleen omistavan alkuperäisen divarin ID
 		this.preparedStatement = this.connection.prepareStatement(this.haeDivariID);
 		this.preparedStatement.setInt(1,this.paramInt);
 		
@@ -429,6 +449,7 @@ public class Asiakaskyselyt{
 			divariID = this.resultset.getInt("DivariID");
 		}
 
+		// Jos divari ei kuulu keskustietokantaan, asetetaan kappale varatuksi myös siellä
 		if (divariID != 2 && divariID != 4) {
             this.preparedStatement = this.connection.prepareStatement(this.yksittainendivariVaraus);
             this.preparedStatement.setInt(1,divariID);
@@ -436,12 +457,17 @@ public class Asiakaskyselyt{
 			this.preparedStatement.executeUpdate();
        	}
 
+       	// Luodaan uusi käynnissä oleva tilaus (vastaa kappaleen siirtämistä "ostoskoriin")
        	this.preparedStatement = this.connection.prepareStatement(this.lisaaVaraus);
        	this.preparedStatement.setInt(1,divariID);
        	this.preparedStatement.setInt(2,this.asiakasID);
        	this.preparedStatement.setInt(3,this.paramInt);
 
        	System.out.println("Kappale lisätty ostoskoriin.");
+
+       	// Sitoudutaan muutoksiin
+         this.connection.commit();
+         this.connection.setAutoCommit(true);
 
 
 
@@ -457,6 +483,137 @@ public class Asiakaskyselyt{
 			System.out.println("löytyykö jotain");
 		}
 	}
+
+	/* Tapahtumat 4 & 5 (tilausvaihe)
+    * Kuvaus: Tilataan ostoskorissa olevat teoskappaleet
+    * Rooli: Asiakas
+    * Parametrit: yhteys, tilausta tekevän asiakkaan sessio
+    */
+	/*
+	public void teeTilaus() throws SQLException{
+
+		this.connection.setAutoCommit(false);
+
+		this.preparedStatement = this.connection.prepareStatement(this.tilaaTuotteet);
+		this.preparedStatement.setInt(1,this.asiakasID);
+		this.resultset = this.preparedStatement.
+
+		// tästä puuttuu
+
+		// Oskoskorissa olevien kappaleiden ID-arvot
+         Stack<Integer> teosKappaleet = new Stack<Integer>();
+            
+         // Kirjojen kokonaispaino
+         int kokoPaino = 0;
+            
+         System.out.println("Tilataan seuraavat kirjat:");
+         System.out.println();
+            
+         while (rset.next()) {
+            System.out.println(rset.getString(1));
+            teosKappaleet.push(rset.getInt(3));
+            kokoPaino += rset.getInt(2);
+         }
+         
+         // Tilauserien lukumäärä
+         int eraLkm = 1;
+         
+         // Lasketaan, moneenko erään tilaus täytyy jakaa (yksi erä on maksimissaan 2000 grammaa)
+         while (kokoPaino > 2000) {
+            eraLkm++;
+            kokoPaino -= 2000;
+         }
+         
+         if (eraLkm > 1) {
+            System.out.println();
+            System.out.println("Tilaus jaetaan painon vuoksi " + eraLkm + " erään.");
+         }
+         
+         // Postikulujen summa
+         float postikulut = 0;
+         
+         // Jokainen 2000 grammaa painava erä maksaa 14 euroa
+         postikulut += (eraLkm-1)*14.00;
+         
+         // Lasketaan yli menevän osan postikulut
+         if (kokoPaino <= 50) {
+            postikulut += 1.40;
+         }
+         else if (kokoPaino <= 100) {
+            postikulut += 2.10;
+         }
+         else if (kokoPaino <= 250) {
+            postikulut += 2.80;
+         }
+         else if (kokoPaino <= 500) {
+            postikulut += 5.60;
+         }
+         else if (kokoPaino <= 1000) {
+            postikulut += 8.40;
+         }
+         else {
+            postikulut += 14.00;
+         }
+         
+         System.out.println();
+         System.out.println("Tilauksen postikulut ovat " + postikulut + " euroa. Vahvistetaanko tilaus? (k/e)");
+         
+         char valinta = scanner.next().charAt(0);
+         
+         // Kysytään valintaa niin kauan, että asiakas syöttää k:n tai e:n
+         while (valinta != 'k' && valinta != 'K' && valinta != 'e' && valinta != 'E') {
+            System.out.println("Virheellinen valinta. Syötä joko k tai e:");
+            valinta = scanner.next().charAt(0);
+         }
+            
+         String tila = "";
+         String vapaus = "";
+         
+         // Asetetaan teosten tila ja vapaus valinnan perusteella
+         if (valinta == 'k' || valinta == 'K') {
+            tila = "Suoritettu";
+            vapaus = "Myyty";
+         }
+         else {
+            tila = "Peruutettu";
+            vapaus = "Vapaa";
+         }
+
+         // Käydään läpi kaikki ostoskorissa olevat teoskappaleet
+         while (!(teosKappaleet.isEmpty())) {
+               
+            int kappaleID = teosKappaleet.pop();
+               
+            // Asetetaan tilaus suoritetuksi/peruutetuksi
+            stmt.executeUpdate("UPDATE keskus.Tilaus SET Tila='" + tila + "' WHERE KappaleID=" + kappaleID);
+               
+            // Asetetaan keskusdivarissa oleva kappale myydyksi/vapaaksi
+            stmt.executeUpdate("UPDATE keskus.TeosKappale SET Vapaus='" + vapaus + "' WHERE KappaleID=" + kappaleID);
+               
+            // Haetaan kappaleen omistavan alkuperäisen divarin ID
+            ResultSet rset2 = stmt.executeQuery("SELECT DivariID FROM keskus.sijainti WHERE KappaleID=" + kappaleID);
+            int divariID = rset2.getInt(1);
+         
+            // Jos divari ei kuulu keskustietokantaan, asetetaan kappale myydyksi/vapaaksi myös siellä
+            if (divariID != 2 && divariID != 4) {
+               stmt.executeUpdate("UPDATE D" + divariID + ".TeosKappale SET Vapaus='" + vapaus + "' WHERE KappaleID=" + kappaleID);
+            }
+         }
+            
+         if (valinta == 'k' || valinta == 'K') {
+            System.out.println("Tilaus suoritettu onnistuneesti!");
+         }
+         else {
+            System.out.println("Tilaus peruutettu!");
+         }
+
+		// Sitoudutaan muutoksiin
+         this.connection.commit();
+         this.connection.setAutoCommit(true);
+	}
+	*/
+
+
 	
 }		
 
