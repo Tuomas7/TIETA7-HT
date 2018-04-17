@@ -14,22 +14,28 @@ public class Kyselyt{
 
 	private PreparedStatement preparedStatement;
 
+	// Prepared statement merkkijonot
 	private String haeKayttajaTiedotStatement;
+	private String haeAsiakasTiedotStatement;
 	private String kirjautumisStatement;
 	private String luoIDStatement;
 	private String tarkastaNimiStatement;
+	private String insertKayttaja;
+	private String insertAsiakas;
 
 	// Tietorakenteet, joihin tallennetaan kyselyiden tuloksia luokan sisällä
-	private HashMap<String, String> kyselyTulos;
+	private HashMap<String, String> kyselyMap;
 	private ArrayList<String> kyselyLista;
 	private int kyselyLuku;
 	private boolean kyselybool;
 
-	// Apumerkkijonoja
+	// Aputietorakenteita
 	private String input1;
 	private String input2;
 	private int paramInt;
 
+	// Tähän mappiin tallennetaan käyttäjän tiedot, jotka tulevat metodiin parametrina
+	private HashMap<String,String> mapInput;
 	private int returnInt;
 
 
@@ -41,25 +47,28 @@ public class Kyselyt{
 		this.preparedStatement = null;
 		
 		this.haeKayttajaTiedotStatement = "SELECT nimi,kayttajaid,salasana,rooli FROM kayttaja WHERE kayttajaid = ?";
+		this.haeAsiakasTiedotStatement = "SELECT etunimi,sukunimi,osoite,sahkoposti,puhelin,saldo FROM asiakas WHERE asiakasid = ?";
 		this.kirjautumisStatement = "SELECT nimi,kayttajaid,rooli FROM kayttaja WHERE salasana =?";
 		this.luoIDStatement = "SELECT kayttajaid FROM kayttaja";
 		this.tarkastaNimiStatement = "SELECT nimi FROM kayttaja";
+		this.insertKayttaja = "INSERT INTO kayttaja VALUES (?,?,?,?)";
+		this.insertAsiakas = "INSERT INTO asiakas VALUES (?,?,?,?,?,?)";
 
 	}
 
-	// Metodi, jota kutsutaan käyttöliittymästä
+	// Metodi, jota kutsutaan käyttöliittymästä. Testi
 	public HashMap<String,String> haeKayttajanTiedot(int id){
 		
 		this.paramInt = id;
 		this.moodi = "haetiedot";
-		this.kyselyTulos = new HashMap<String,String>();
+		this.kyselyMap = new HashMap<String,String>();
 		
 		this.yhteysHandleri();
 
-		return this.kyselyTulos;
+		return this.kyselyMap;
 	}
 
-	// Luo käyttäjälle uuden ID:n
+	// Luo käyttäjälle uuden ID:n randomilla, tarkastaa ettei löydy kannasta
 	public int luoID(){
 		this.moodi ="luoid";
 		this.yhteysHandleri();
@@ -68,7 +77,7 @@ public class Kyselyt{
 
 	}
 
-	// 
+	// Kirjautumisen yhteydessä, tarkastaa, että tunnus ja salasana täsmäävät kannassa
 	public boolean tarkastaKirjautuminen(String tunnus, String salasana){
 
 		this.kyselybool = false;
@@ -82,21 +91,50 @@ public class Kyselyt{
 		return this.kyselybool;
 	}
 
+	public boolean lisaaKayttaja(HashMap<String,String> kayttajatiedot){
+		
+		this.kyselybool = false;
+		
+		// Tallennetaan parametrina saatu tietorakenne olio-attribuuttiin, jolloin se näkyy muille metodeille.
+		this.mapInput = kayttajatiedot;
+		// Luodaan käyttäjälle uusi id
+		int id = 0;
+		while(id == 0){
+			// asettaa olio-attribuutin returnInt arvon
+			this.luoID();
+			id = this.returnInt;
+		}
+
+		// luoID() - kutsu asettaa moodin, joten se täytyy asettaa vasta tässä vaiheessa
+		this.moodi = "lisaakayttaja";
+		
+		this.yhteysHandleri();
+
+		return this.kyselybool;
+
+	}
+
 	// Yhteinen "yhteyshandleri" kyselyille, joka hoitaa yhteyksien avaamiset ja sulkemiset
 	// kyselyn tulokset tallennetaan oliomuuttujiin (HashMap, ArrayList, int)
 	private void yhteysHandleri(){
 
-
+		//System.out.println(this.returnInt);
 		try{
 			this.connection = this.yhteys.uusiYhteys();
 			
 			// tässä kohtaa kutsutaan privaattia kyselyfunktiota
 			if(this.moodi.equals("haetiedot")){
 				this.kayttajanTiedot();
+
 			}else if(this.moodi.equals("luoid")){
 				this.id();
+
 			}else if(this.moodi.equals("tarkastakirjautuminen")){
 				this.kirjautuminen();
+
+			}else if(this.moodi.equals("lisaakayttaja")){
+
+				this.lisaaKayttajaTiedot();
 			}
 	
 
@@ -122,16 +160,33 @@ public class Kyselyt{
 		}
 	}
 
+	// Hakee käyttäjän tiedot kannasta
 	private void kayttajanTiedot() throws SQLException{
 
+		// Haetaan ensin tiedot kayttaja-relaatiosta
 		this.preparedStatement = this.connection.prepareStatement(this.haeKayttajaTiedotStatement);
 		this.preparedStatement.setInt(1,this.paramInt);
 		this.resultset = this.preparedStatement.executeQuery();
 
+		// Lisätään tiedot HashMappiin
 		while(this.resultset.next()){
-			this.kyselyTulos.put("nimi",this.resultset.getString("nimi"));
-			this.kyselyTulos.put("salasana",this.resultset.getString("salasana"));
-			this.kyselyTulos.put("rooli",this.resultset.getString("rooli"));
+			this.kyselyMap.put("nimi",this.resultset.getString("nimi"));
+			this.kyselyMap.put("salasana",this.resultset.getString("salasana"));
+			this.kyselyMap.put("rooli",this.resultset.getString("rooli"));
+		}
+
+		// Haetaan myös tiedot asiakas-relaatiosta
+		this.preparedStatement = this.connection.prepareStatement(this.haeAsiakasTiedotStatement);
+		this.preparedStatement.setInt(1,this.paramInt);
+		this.resultset = this.preparedStatement.executeQuery();
+
+		while(this.resultset.next()){
+			this.kyselyMap.put("etunimi",this.resultset.getString("etunimi"));
+			this.kyselyMap.put("sukunimi",this.resultset.getString("sukunimi"));
+			this.kyselyMap.put("osoite",this.resultset.getString("osoite"));
+			this.kyselyMap.put("puhelin",this.resultset.getString("puhelin"));
+			this.kyselyMap.put("sahkoposti", this.resultset.getString("sahkoposti"));
+			this.kyselyMap.put("saldo",this.resultset.getString("saldo"));
 		}
 
 	}
@@ -165,6 +220,20 @@ public class Kyselyt{
 				this.kyselybool = true;
 			}
 		}
+
+	}
+
+	private void lisaaKayttajaTiedot() throws SQLException{
+		this.preparedStatement = this.connection.prepareStatement(this.insertKayttaja);
+		// ID on tällä hetkellä tallennettuna returnInt-attribuuttiin
+		this.preparedStatement.setInt(1,this.returnInt);
+		this.preparedStatement.setString(2,this.mapInput.get("tunnus"));
+		this.preparedStatement.setString(3,this.mapInput.get("salasana"));
+		this.preparedStatement.setString(4,this.mapInput.get("rooli"));
+
+		this.preparedStatement.executeUpdate();
+
+		this.kyselybool = true;
 
 	}
 	

@@ -131,12 +131,15 @@ public class Asiakasistunto{
 		System.out.println("Kirjahaku");
 		System.out.println("Valitse hakuehto:");
 		String hakusyote="";
-		while(!hakusyote.equals("4")){
+		while(!hakusyote.equals("6")){
 
 			System.out.println("[ 1 ] Hae nimen perusteella");
 			System.out.println("[ 2 ] Hae tekijän perusteella");
 			System.out.println("[ 3 ] Hae luokan perusteella");
-			System.out.println("[ 4 ] Takaisin päävalikkoon");
+			System.out.println("[ 4 ] Hae tyypin perusteella");
+			System.out.println("[ 5 ] Hae kaikkien tietojen perusteella");
+			System.out.println("[ 6 ] Takaisin päävalikkoon");
+
 			System.out.print("\n> ");
 			hakusyote = this.lukija.nextLine();
 
@@ -152,9 +155,18 @@ public class Asiakasistunto{
 				this.hakukriteeri = "luokka";
 				this.haekirjoja();
 				
-			}else if(!hakusyote.equals("4")){
+			}else if(hakusyote.equals("4")){
+				this.hakukriteeri = "tyyppi";
+				this.haekirjoja();
+
+			}else if(hakusyote.equals("5")){
+				this.hakukriteeri = "kaikki";
+				this.haekirjoja();
+
+			}else if(!hakusyote.equals("6")){
 				System.out.println("Tuntematon komento!");
 			}
+			
 		}
 		
 	}
@@ -162,7 +174,12 @@ public class Asiakasistunto{
 	public void haekirjoja(){
 		
 		String hakusana="";
-		System.out.print("Syötä haettavan kirjan "+this.hakukriteeri+":\n> ");
+		if(this.hakukriteeri.equals("kaikki")){
+			System.out.print("Syötä hakusana:\n> ");
+		}else{
+			System.out.print("Syötä haettavan kirjan "+this.hakukriteeri+":\n> ");
+		}
+		
 
 		hakusana = this.lukija.nextLine();
 
@@ -170,20 +187,21 @@ public class Asiakasistunto{
 			this.lisaaHakuHistoriaan(hakusana);
 		}
 
-		if(this.hakukriteeri.equals("nimi")){
+		if(this.hakukriteeri.equals("nimi") || this.hakukriteeri.equals("tekija") || this.hakukriteeri.equals("luokka") || this.hakukriteeri.equals("tyyppi") || this.hakukriteeri.equals("kaikki")){
 			this.teoshakutulokset = kyselyt.haeTeoksia(this.hakukriteeri, hakusana);
 
-
-		}else if(this.hakukriteeri.equals("tekija")){
-
-		}else if(this.hakukriteeri.equals("luokka")){
-
 		}
-		this.tulostaHaku();
+
+		if(this.teoshakutulokset.size() == 0){
+			System.out.println("Mitään ei löytynyt!\n");
+		}else{
+			this.tulostaHaku();
+		}
+		
 	}
 
 	public void tulostaHaku(){
-		System.out.println("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
+		System.out.println("\n--------------------------------------------------------------------------------------------------------------------------------------------------------------");
       	System.out.format("%5s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s\n","","ISBN","Kappaleid","Nimi","Tekija","Vuosi","Tyyppi","Luokka","Paino","Hinta","Vapaana");
       	System.out.println("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
 
@@ -194,17 +212,15 @@ public class Asiakasistunto{
       		for(int j = 0 ; j<this.teoshakutulokset.get(avain).size();j++){
 
       			System.out.format("%15s",this.teoshakutulokset.get(avain).get(j));
+
       		}
       		System.out.println();
-      		//System.out.println(haut.get(avain).size());
-      		//for(int j = 0;j<haut.get(avain).size();i++){
-      			//System.out.println(haut.get(avain));
-      			//System.out.format("%15s",haut.get(String.valueOf(i)).get(j));
-      		//}
 
-      		//System.out.format("%15s%15s%15s%15s\n",haut.get(String.valueOf(i)));
+      		
       	}
+      	System.out.println("\n");
 	}
+
 
 
 	

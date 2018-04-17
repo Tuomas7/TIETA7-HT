@@ -1,5 +1,6 @@
 // Luokka, joka sisältä kirjautuneen käyttäjän tapahtumat
 import java.util.Scanner;
+import java.sql.*;
 
 public class KayttajaTapahtumat{
 
@@ -36,16 +37,31 @@ public class KayttajaTapahtumat{
 	}
 
 	public static boolean haekirjoja(Scanner lukija, String hakuehto, Sessio istunto){
-		String nimi ="";
+		String haku ="";
 		System.out.print("Syötä haettavan kirjan "+hakuehto+":\n> ");
-		nimi = lukija.nextLine();
+		haku = lukija.nextLine();
+		if(haku.length()>0){
+			istunto.lisaaHakuHistoriaan(haku);
+		}
+
+		try{
+			Statement stmt = istunto.haeYhteys().createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT nimi,tekija,luokka FROM teos WHERE '"+hakuehto+"' LIKE '%"+haku+"%'");
+		
+			while(rs.next()){
+				System.out.println(rs.getString("nimi") +", "+rs.getString("tekija")+", "+rs.getString("luokka"));
+			}
+			
+			
+		}catch (SQLException poikkeus){
+			System.out.println("Tapahtui seuraava virhe: " + poikkeus.getMessage());
+		}
+
 
 		return true;
 	}
 
-	public static void naytaProfiili(Scanner lukija, Sessio istunto){
-
-	}
+	
 
 
 
