@@ -81,7 +81,7 @@ public class Asiakasistunto{
 	}
 
 	public String haeTunnus(){
-		return this.asiakastiedot.get("tunnus");
+		return this.asiakastiedot.get("nimi");
 	}
 
 	public String haeSalasana(){
@@ -105,7 +105,8 @@ public class Asiakasistunto{
 	}
 
 	public void tulostaOstoskori(){
-		this.ostoskori = haeOstoskori();
+		this.ostoskori = this.kyselyt.haeVaraukset(this.id);
+		
 		if(this.ostoskori.size() == 0){
 			System.out.println("Ostoskori on tyhjä.");
 		}else{
@@ -207,17 +208,23 @@ public class Asiakasistunto{
 	}
 
 	public void tulostaHaku(){
-		System.out.println("\n--------------------------------------------------------------------------------------------------------------------------------------------------------------");
-      	System.out.format("%5s%15s%15s%15s%15s%15s%15s%15s%15s%15s%15s\n","","ISBN","Kappaleid","Nimi","Tekija","Vuosi","Tyyppi","Luokka","Paino","Hinta","Vapaana");
-      	System.out.println("--------------------------------------------------------------------------------------------------------------------------------------------------------------");
+		System.out.println("\n-------------------------------------------------------------------------------------------------------------------------------------------------");
+      	System.out.format("%5s%15s%30s%30s%15s%15s%15s%10s%10s\n","","ISBN","Nimi","Tekija","Vuosi","Tyyppi","Luokka","Paino","Hinta");
+      	System.out.println("-------------------------------------------------------------------------------------------------------------------------------------------------");
 
       	for(int i = 1 ; i< this.teoshakutulokset.size()+1; i++){
       		String avain = String.valueOf(i);
       		//System.out.println(haut.get(avain));
       		System.out.format("%5s",avain);
       		for(int j = 0 ; j<this.teoshakutulokset.get(avain).size();j++){
-
-      			System.out.format("%15s",this.teoshakutulokset.get(avain).get(j));
+      			if(j==1 || j==2){
+      				System.out.format("%30s",this.teoshakutulokset.get(avain).get(j));
+      			}else if(j==6 || j==7){
+      				System.out.format("%10s",this.teoshakutulokset.get(avain).get(j));
+      			}else{
+      				System.out.format("%15s",this.teoshakutulokset.get(avain).get(j));
+      			}
+      			
 
       		}
       		System.out.println();
@@ -254,7 +261,7 @@ public class Asiakasistunto{
 		String hakuid = lukija.nextLine();
 		
 		this.kyselyt.lisaaVaraus(Integer.parseInt(hakuid));
-		this.paivitaOstoskori();
+	
 
 		return true;
 
@@ -264,9 +271,8 @@ public class Asiakasistunto{
 		//return true;
 	} 
 
-	public void paivitaOstoskori(){
-		this.ostoskori = this.kyselyt.haeVaraukset(this.id);
 
+	public void tilaaTuotteet(){
 
 	}
 

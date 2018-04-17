@@ -155,6 +155,7 @@ public class Tapahtumat{
     * Rooli: Asiakas
     * Parametrit: yhteys, tilausta tekevän asiakkaan sessio, tilattavan kappaleen ID
     */
+   /*
 	public static void lisaaOstoskoriin(Connection yhteys, Sessio sessio, int kappaleID) {
    
       try {
@@ -204,7 +205,7 @@ public class Tapahtumat{
       }
    }
    
-   
+   */
    /* Tapahtumat 4 & 5 (tilausvaihe)
     * Kuvaus: Tilataan ostoskorissa olevat teoskappaleet
     * Rooli: Asiakas

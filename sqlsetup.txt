@@ -130,3 +130,19 @@ INSERT INTO keskus.sijainti VALUES(3,10);
 INSERT INTO keskus.sijainti VALUES(1,11);
 INSERT INTO keskus.sijainti VALUES(1,12);
 
+
+GRANT ALL PRIVILEGES ON SCHEMA D1 TO GROUP testuser;
+GRANT ALL PRIVILEGES ON table D1.teos TO testuser;
+GRANT ALL PRIVILEGES ON table D1.teoskappale TO testuser;
+
+INSERT INTO D1.teos VALUES(12345,'sieppari','Arto',1984,'jannitys','romaani',40);
+INSERT INTO D1.teos VALUES(13345,'länsirintama','Simo',1800,'tietokirja','kaskut',400);
+
+INSERT INTO D1.teoskappale VALUES(1,12345,22,19,'10-10-1986');
+INSERT INTO D1.teoskappale VALUES(2,12345,22,10,'10-10-1986');
+INSERT INTO D1.teoskappale VALUES(3,13345,12,10,'10-10-1986');
+INSERT INTO D1.teoskappale VALUES(4,13345,22,17,'10-10-1986');
+
+
+
+INSERT INTO keskus.tilaus VALUES();

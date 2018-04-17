@@ -61,30 +61,30 @@ public class Asiakaskyselyt{
 		this.resultset = null;
 		this.preparedStatement = null;
 		
-		this.haeKayttajaTiedotStatement = "SELECT nimi,kayttajaid,salasana,rooli FROM kayttaja WHERE kayttajaid = ?";
-		this.haeAsiakasTiedotStatement = "SELECT etunimi,sukunimi,osoite,sahkoposti,puhelin,saldo FROM asiakas WHERE asiakasid = ?";
-		this.kirjautumisStatement = "SELECT nimi,kayttajaid,rooli FROM kayttaja WHERE salasana =?";
+		this.haeKayttajaTiedotStatement = "SELECT nimi,kayttajaid,salasana,rooli FROM keskus.kayttaja WHERE kayttajaid = ?";
+		this.haeAsiakasTiedotStatement = "SELECT etunimi,sukunimi,osoite,sahkoposti,puhelin,saldo FROM keskus.asiakas WHERE asiakasid = ?";
+		this.kirjautumisStatement = "SELECT nimi,kayttajaid,rooli FROM keskus.kayttaja WHERE salasana =?";
 		
 		// Rekisteröinnin statementit
-		this.luoIDStatement = "SELECT kayttajaid FROM kayttaja";
-		this.tarkastaNimiStatement = "SELECT nimi FROM kayttaja";
-		this.insertKayttaja = "INSERT INTO kayttaja VALUES (?,?,?,?)";
-		this.insertAsiakas = "INSERT INTO asiakas VALUES (?,?,?,?,?,?)";
+		this.luoIDStatement = "SELECT kayttajaid FROM keskus.kayttaja";
+		this.tarkastaNimiStatement = "SELECT nimi FROM keskus.kayttaja";
+		this.insertKayttaja = "INSERT INTO keskus.kayttaja VALUES (?,?,?,?)";
+		this.insertAsiakas = "INSERT INTO keskus.asiakas VALUES (?,?,?,?,?,?)";
 
 		// Haun statementit
-		this.haeTeosNimet = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM teos NATURAL JOIN teoskappale WHERE nimi LIKE ?";
-		this.haeTeosTekijat = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM teos NATURAL JOIN teoskappale WHERE tekija LIKE ?";
-		this.haeTeosLuokat = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM teos NATURAL JOIN teoskappale WHERE luokka LIKE ?";
-		this.haeTeosTyypit = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM teos NATURAL JOIN teoskappale WHERE tyyppi LIKE ?";
-		this.haeTeosKaikki = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM teos NATURAL JOIN teoskappale WHERE nimi LIKE ? OR tekija LIKE ? OR luokka LIKE ? OR tyyppi LIKE ?";
+		this.haeTeosNimet = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE nimi LIKE ?";
+		this.haeTeosTekijat = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE tekija LIKE ?";
+		this.haeTeosLuokat = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE luokka LIKE ?";
+		this.haeTeosTyypit = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE tyyppi LIKE ?";
+		this.haeTeosKaikki = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE nimi LIKE ? OR tekija LIKE ? OR luokka LIKE ? OR tyyppi LIKE ?";
 
 		// Varaustapahtuman statementit
-		this.keskusdivariVaraus = "UPDATE keskus.TeosKappale SET Vapaus='Varattu' WHERE KappaleID=?";
+		this.keskusdivariVaraus = "UPDATE keskus.teoskappale SET Vapaus='Varattu' WHERE KappaleID=?";
 		this.haeDivariID = "SELECT DivariID FROM keskus.sijainti WHERE KappaleID=?";
-		this.yksittainendivariVaraus ="UPDATE D?.TeosKappale SET Vapaus='Varattu' WHERE KappaleID=?";
-		this.lisaaVaraus = "INSERT INTO keskus.Tilaus VALUES (?, ?, ?', 'Käynnissä')";
+		
+		this.lisaaVaraus = "INSERT INTO keskus.tilaus VALUES (?, ?, ?,?)";
 
-		this.haeVaraukset = "SELECT kappaleid, DivariID, isbn, hinta, nimi, tekija, vuosi, tyyppi, luokka, paino FROM tilaus NATURAL JOIN teoskappale NATURAL JOIN teos WHERE asiakasid = ? AND tila = 'Kaynnissa'";
+		this.haeVaraukset = "SELECT kappaleid, DivariID, isbn, hinta, nimi, tekija, vuosi, tyyppi, luokka, paino FROM keskus.tilaus NATURAL JOIN keskus.teoskappale NATURAL JOIN keskus.teos WHERE asiakasid = ? AND tila = 'Käynnissä'";
 
 		// Tilaus statement
 		this.tilaaTuotteet = "";
@@ -183,11 +183,12 @@ public class Asiakaskyselyt{
 		this.asiakasID = asiakasID;
 		this.moodi = "haevaraukset";
 		this.yhteysHandleri();
-
+		System.out.println("eka");
 		return teoskysely;
 	}
 
 	public void lisaaVaraus(int ID){
+		this.paramInt = ID;
 		this.asiakasID = asiakasID;
 		this.moodi = "lisaavaraus";
 		this.yhteysHandleri();
@@ -234,6 +235,7 @@ public class Asiakaskyselyt{
 		}catch(SQLException poikkeus) {
         	System.out.println("Tapahtui seuraava virhe: " + poikkeus.getMessage());  
         	// Tähän iffeillä kullekin omat virheet?
+        	/*
         	try {
             
 	            // Perutaan tapahtuma
@@ -242,6 +244,7 @@ public class Asiakaskyselyt{
          	} catch (SQLException poikkeus2) {
             	System.out.println("Tapahtuman peruutus epäonnistui: " + poikkeus2.getMessage()); 
          	}
+         	*/
       	}finally {
     		if (this.resultset != null) {
         		try {
@@ -380,17 +383,16 @@ public class Asiakaskyselyt{
 
 		this.teoskysely = new HashMap<String,ArrayList<String>>();
 
-		int indeksi = 1;
+	
 
 		while(this.resultset.next()){
 
-			String kyselynumero = String.valueOf(indeksi);
+			String kyselynumero = this.resultset.getString("kappaleid");
 
 			// Lisätään teoksen kaikki tiedot merkkijonoina ArrayListiin
 			ArrayList<String> teostiedot = new ArrayList<>();
 
 			teostiedot.add(this.resultset.getString("isbn"));
-			teostiedot.add(this.resultset.getString("kappaleid"));
 			teostiedot.add(this.resultset.getString("nimi"));
 			teostiedot.add(this.resultset.getString("tekija"));
 			teostiedot.add(this.resultset.getString("vuosi"));
@@ -398,14 +400,10 @@ public class Asiakaskyselyt{
 			teostiedot.add(this.resultset.getString("luokka"));
 			teostiedot.add(this.resultset.getString("paino"));
 			teostiedot.add(this.resultset.getString("hinta"));
-			teostiedot.add(this.resultset.getString("vapaus"));
+			
 			
 			// Lisätään tiedot HashMappiin, avaimena kyselynumero, arvona arraylist
 			this.teoskysely.put(kyselynumero,teostiedot);
-
-			indeksi = indeksi +1;
-			System.out.println(indeksi);
-			System.out.println(this.resultset.getString("nimi"));
 			
 		}
 
@@ -450,18 +448,22 @@ public class Asiakaskyselyt{
 		}
 
 		// Jos divari ei kuulu keskustietokantaan, asetetaan kappale varatuksi myös siellä
+		
 		if (divariID != 2 && divariID != 4) {
+			this.yksittainendivariVaraus = "UPDATE D"+divariID+".TeosKappale SET Vapaus='Varattu' WHERE KappaleID=?";
+
             this.preparedStatement = this.connection.prepareStatement(this.yksittainendivariVaraus);
-            this.preparedStatement.setInt(1,divariID);
-            this.preparedStatement.setInt(2,this.paramInt);
+            this.preparedStatement.setInt(1,this.paramInt);
 			this.preparedStatement.executeUpdate();
        	}
-
+		
        	// Luodaan uusi käynnissä oleva tilaus (vastaa kappaleen siirtämistä "ostoskoriin")
        	this.preparedStatement = this.connection.prepareStatement(this.lisaaVaraus);
        	this.preparedStatement.setInt(1,divariID);
        	this.preparedStatement.setInt(2,this.asiakasID);
        	this.preparedStatement.setInt(3,this.paramInt);
+       	this.preparedStatement.setString(4,"Käynnissä");
+       	this.preparedStatement.executeUpdate();
 
        	System.out.println("Kappale lisätty ostoskoriin.");
 
@@ -475,12 +477,32 @@ public class Asiakaskyselyt{
 
 	public void varauksienHaku() throws SQLException{
 
+		
+
 		this.preparedStatement = this.connection.prepareStatement(this.haeVaraukset);
 		this.preparedStatement.setInt(1,this.asiakasID);
 		this.resultset = this.preparedStatement.executeQuery();
+		System.out.println("koo");
 
 		while(this.resultset.next()){
-			System.out.println("löytyykö jotain");
+			String kyselynumero = this.resultset.getString("kappaleid");
+
+			// Lisätään teoksen kaikki tiedot merkkijonoina ArrayListiin
+			ArrayList<String> teostiedot = new ArrayList<>();
+
+			teostiedot.add(this.resultset.getString("isbn"));
+			teostiedot.add(this.resultset.getString("nimi"));
+			teostiedot.add(this.resultset.getString("tekija"));
+			teostiedot.add(this.resultset.getString("vuosi"));
+			teostiedot.add(this.resultset.getString("tyyppi"));
+			teostiedot.add(this.resultset.getString("luokka"));
+			teostiedot.add(this.resultset.getString("paino"));
+			teostiedot.add(this.resultset.getString("hinta"));
+			System.out.println("toka");
+			
+			// Lisätään tiedot HashMappiin, avaimena kyselynumero, arvona arraylist
+			this.teoskysely.put(kyselynumero,teostiedot);
+	
 		}
 	}
 

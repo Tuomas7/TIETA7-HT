@@ -51,10 +51,10 @@ public class Kirjakauppa{
 				Asiakasistunto istunto = null;
 				printBanner();
 				istunto = avustaja.kirjaudu();
-				System.out.println(istunto.haeNimi());
+				
 
 				if(istunto != null){
-
+					System.out.println(istunto.haeNimi());
 					sisaankirjausKayttaja(istunto, lukija);
 				}
 
