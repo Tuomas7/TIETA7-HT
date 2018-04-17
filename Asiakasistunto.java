@@ -13,7 +13,7 @@ public class Asiakasistunto{
 	private double saldo;
 
 	// Ostoskorista olio?
-	private HashMap<String,String> ostoskori;
+	private HashMap<String,ArrayList<String>> ostoskori;
 	private String hakukriteeri;
 	private String hakusana;
 	private HashMap<String,ArrayList<String>> teoshakutulokset;
@@ -32,7 +32,7 @@ public class Asiakasistunto{
 		this.hakuhistoria = new ArrayList<>();
 
 		// Ajatus ostoskorista: luodaan kantaan attribuutti ostoskorin merkkijonolle, joka ladataan kun käyttäjä kirjautuu sisään?
-		this.ostoskori = new HashMap<String,String>();
+		this.ostoskori = new HashMap<String,ArrayList<String>>();
 		this.saldo = Double.parseDouble(this.asiakastiedot.get("saldo"));
 	}
 
@@ -71,7 +71,7 @@ public class Asiakasistunto{
 		return this.hakuhistoria;
 	}
 
-	public HashMap<String,String> haeOstoskori(){
+	public HashMap<String,ArrayList<String>> haeOstoskori(){
 		return this.ostoskori;
 	}
 
@@ -107,7 +107,11 @@ public class Asiakasistunto{
 		if(this.ostoskori.size() == 0){
 			System.out.println("Ostoskori on tyhjä.");
 		}else{
-			System.out.println("Ei tyhjä.");
+			System.out.println("asf");
+			for(int i = 1 ; i < this.ostoskori.size()+1; i++){
+				System.out.println(this.ostoskori.get(String.valueOf(i)));
+			}
+			
 		}
 	}
 
@@ -219,7 +223,36 @@ public class Asiakasistunto{
       		
       	}
       	System.out.println("\n");
+
+      	System.out.println("Valitse haluamasi kirja ostoskoriin tai tee uusi haku");
+
+      	System.out.println("[ 1 ] Lisaa kirja ostoskoriin");
+		System.out.println("[ 2 ] Tee uusi haku");
+
+      	String syote3 = "";
+      	while(!syote3.equals("3")){
+      		syote3 = lukija.nextLine();
+      		if(syote3.equals("1")){
+      			if(this.lisaaKoriin()){
+      				System.out.println("Teos lisätty ostoskoriin onnistuneesti!");
+      				break;
+      			}
+      		}else if(syote3.equals("2")){
+      			break;
+      		}
+      		System.out.println("Tuntematon komento!");
+      	}
+
 	}
+
+	public boolean lisaaKoriin(){
+
+		System.out.println("Syötä hakutuloksessa näkyvä rivin ensimmäinen numero:\n> ");
+		String hakuid = lukija.nextLine();
+		System.out.println(this.teoshakutulokset.get(hakuid));
+		this.ostoskori.put(hakuid,this.teoshakutulokset.get(hakuid));
+		return true;
+	} 
 
 
 
