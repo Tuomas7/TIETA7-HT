@@ -1,6 +1,11 @@
 import java.sql.*;
 import java.util.Scanner;
 import java.util.Stack;
+import java.io.IOException;
+import javax.xml.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 public class Tapahtumat{
 
@@ -117,6 +122,9 @@ public class Tapahtumat{
          stmt.executeUpdate("INSERT INTO keskus.TeosKappale VALUES ('" + id + "', '" + isbn + "', '"
             + hinta + "', '" + ostohinta + "', null, 'Vapaa')");
       
+         // Lisätään kappaleen tunnus myös sijaintitauluun
+         stmt.executeUpdate("INSERT INTO keskus.Sijainti VALUES ('2', '" + id + "')");
+      
          System.out.println("Tiedot lisätty onnnistuneesti!");
          
          // Sitoudutaan muutoksiin
@@ -156,30 +164,17 @@ public class Tapahtumat{
          // Luodaan tapahtumaolio
          Statement stmt = yhteys.createStatement();
          
-         // Haetaan kirjan omistavan divarin id 
-         ResultSet rset = stmt.executeQuery("SELECT DivariID FROM keskus.sijainti"
-            + "WHERE KappaleID=" + kappaleID);
-         
+         // Asetetaan keskusdivarissa oleva kappale varatuksi
+         stmt.executeUpdate("UPDATE keskus.TeosKappale SET Vapaus='Varattu' WHERE KappaleID=" + kappaleID);
+               
+         // Haetaan kappaleen omistavan alkuperäisen divarin ID
+         ResultSet rset = stmt.executeQuery("SELECT DivariID FROM keskus.sijainti WHERE KappaleID=" + kappaleID);
          int divariID = rset.getInt(1);
-         String divari = "";
          
-         // Päätellään divarin nimi tietokannassa
-         if (divariID == 1) {
-            divari = "D1";
+         // Jos divari ei kuulu keskustietokantaan, asetetaan kappale varatuksi myös siellä
+         if (divariID != 2 && divariID != 4) {
+            stmt.executeUpdate("UPDATE D" + divariID + ".TeosKappale SET Vapaus='Varattu' WHERE KappaleID=" + kappaleID);
          }
-         else if (divariID == 3) {
-            divari = "D3";
-         }
-         else if (divariID == 4) {
-            divari = "D4";
-         }
-         else {
-            divari = "keskus";
-         }
-      
-         // Asetetaan teos varatuksi
-         stmt.executeUpdate("UPDATE " + divari + ".TeosKappale SET Vapaus='Varattu'"
-            + "WHERE KappaleID=" + kappaleID);
       
          // Luodaan uusi käynnissä oleva tilaus (vastaa kappaleen siirtämistä "ostoskoriin")
          stmt.executeUpdate("INSERT INTO keskus.Tilaus VALUES ('" + divariID + "', '"
@@ -239,9 +234,9 @@ public class Tapahtumat{
          System.out.println();
             
          while (rset.next()) {
-           System.out.println(rset.getString(1));
-           teosKappaleet.push(rset.getInt(2));
-           kokoPaino += rset.getInt(3);
+            System.out.println(rset.getString(1));
+            teosKappaleet.push(rset.getInt(3));
+            kokoPaino += rset.getInt(2);
          }
          
          // Tilauserien lukumäärä
@@ -291,34 +286,51 @@ public class Tapahtumat{
          Scanner scanner = new Scanner(System.in);
          char valinta = scanner.next().charAt(0);
          
-         // Jatketaan, jos asiakas syöttää k:n. Kaikki muut syötteet peruvat tapahtuman
-         if (valinta == 'k' || valinta == 'K') {
+         // Kysytään valintaa niin kauan, että asiakas syöttää k:n tai e:n
+         while (valinta != 'k' && valinta != 'K' && valinta != 'e' && valinta != 'E') {
+            System.out.println("Virheellinen valinta. Syötä joko k tai e:");
+            valinta = scanner.next().charAt(0);
+         }
             
-            // Käydään läpi kaikki ostoskorissa olevat teoskappaleet
-            while (!(teosKappaleet.isEmpty())) {
-               
-               int kappaleID = teosKappaleet.pop();
-               
-               // Asetetaan tilaus suoritetuksi
-               stmt.executeUpdate("UPDATE keskus.Tilaus SET Tila='Suoritettu' WHERE KappaleID=" + kappaleID);
-               
-               // Asetetaan keskusdivarissa oleva kappale myydyksi
-               stmt.executeUpdate("UPDATE keskus.TeosKappale SET Vapaus='Myyty' WHERE KappaleID=" + kappaleID);
-               
-               // Haetaan kappaleen omistavan alkuperäisen divarin ID
-               ResultSet rset2 = stmt.executeQuery("SELECT DivariID FROM keskus.sijainti WHERE KappaleID=" + kappaleID);
-               int divariID = rset2.getInt(1);
+         String tila = "";
+         String vapaus = "";
          
-               // Jos divari on jokin muu kuin keskustietokanta, asetetaan kappale myydyksi myös siellä
-               if (divariID != 2) {
-                  stmt.executeUpdate("UPDATE D" + divariID + ".TeosKappale SET Vapaus='Myyty' WHERE KappaleID=" + kappaleID);
-               }
-            }
+         // Asetetaan teosten tila ja vapaus valinnan perusteella
+         if (valinta == 'k' || valinta == 'K') {
+            tila = "Suoritettu";
+            vapaus = "Myyty";
+         }
+         else {
+            tila = "Peruutettu";
+            vapaus = "Vapaa";
+         }
             
+         // Käydään läpi kaikki ostoskorissa olevat teoskappaleet
+         while (!(teosKappaleet.isEmpty())) {
+               
+            int kappaleID = teosKappaleet.pop();
+               
+            // Asetetaan tilaus suoritetuksi/peruutetuksi
+            stmt.executeUpdate("UPDATE keskus.Tilaus SET Tila='" + tila + "' WHERE KappaleID=" + kappaleID);
+               
+            // Asetetaan keskusdivarissa oleva kappale myydyksi/vapaaksi
+            stmt.executeUpdate("UPDATE keskus.TeosKappale SET Vapaus='" + vapaus + "' WHERE KappaleID=" + kappaleID);
+               
+            // Haetaan kappaleen omistavan alkuperäisen divarin ID
+            ResultSet rset2 = stmt.executeQuery("SELECT DivariID FROM keskus.sijainti WHERE KappaleID=" + kappaleID);
+            int divariID = rset2.getInt(1);
+         
+            // Jos divari ei kuulu keskustietokantaan, asetetaan kappale myydyksi/vapaaksi myös siellä
+            if (divariID != 2 && divariID != 4) {
+               stmt.executeUpdate("UPDATE D" + divariID + ".TeosKappale SET Vapaus='" + vapaus + "' WHERE KappaleID=" + kappaleID);
+            }
+         }
+            
+         if (valinta == 'k' || valinta == 'K') {
             System.out.println("Tilaus suoritettu onnistuneesti!");
          }
          else {
-            System.out.println("Tilaus peruttu");
+            System.out.println("Tilaus peruutettu!");
          }
          
          // Sitoudutaan muutoksiin
@@ -342,4 +354,107 @@ public class Tapahtumat{
          }
       }
    }
+   
+   /* Tapahtuma 7
+    * Kuvaus: Siirretään uusien teosten tiedot divarista D1 keskustietokantaan
+    * Rooli: Divarin D1 ylläpitäjä
+    */
+   public static void paivitaKeskustietokanta(Connection yhteys) {
+   
+      try {
+   
+         yhteys.setAutoCommit(false);
+   
+         // Luodaan tapahtumaolio
+         Statement stmt = yhteys.createStatement();
+      
+         // Siirretään kaikki teosten yleiset tiedot keskustietokantaan, jos niitä ei vielä ole siellä
+         stmt.executeUpdate("INSERT INTO keskus.Teos SELECT * FROM D1.Teos ON CONFLICT DO NOTHING");
+      
+         // Tehdään sama myös yksittäisten kappaleiden tiedoilla
+         stmt.executeUpdate("INSERT INTO keskus.TeosKappale SELECT * FROM D1.TeosKappale ON CONFLICT DO NOTHING");
+      
+         // Haetaan kaikki kappaleIDt, joita ei löydy sijaintitaulusta
+         ResultSet rset = stmt.executeQuery("SELECT TeosKappale.KappaleID FROM keskus.TeosKappale "
+            + "NATURAL LEFT JOIN keskus.Sijainti WHERE Sijainti.KappaleID IS NULL");
+      
+         // Lisätään puuttuvat KappaleIDt sijaintitauluun
+         while (rset.next()) {
+            stmt.executeUpdate("INSERT INTO keskus.Sijainti VALUES ('1', '" + rset.getInt(1) + "')");
+         }
+      
+         System.out.println("Tiedot päivitetty keskustietokantaan onnnistuneesti!");
+         
+         // Sitoudutaan muutoksiin
+         yhteys.commit();
+         yhteys.setAutoCommit(true);
+         
+         // Suljetaan tapahtumaolio
+         stmt.close();
+         
+      } catch (SQLException poikkeus) {
+         
+         System.out.println("Tietojen päivitys epäonnistui: " + poikkeus.getMessage());  
+         
+         try {
+            
+            // Perutaan tapahtuma
+            yhteys.rollback();
+            
+         } catch (SQLException poikkeus2) {
+            System.out.println("Tapahtuman peruutus epäonnistui: " + poikkeus2.getMessage()); 
+         }
+      }
+	}
+   
+   /* Tapahtuma 8
+    * Kuvaus: Siirretään divarin D4 XML-muotoinen data keskustietokantaan
+    * Rooli: Keskusdivarin ylläpitäjä
+    */
+   public static void siirraXMLdata(Connection yhteys) {
+   
+      // Työkaluja XML-tiedoston käsittelyä varten
+      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      factory.setNamespaceAware(true);
+      DocumentBuilder builder;
+      Document doc = null;
+      
+      try {
+         
+         yhteys.setAutoCommit(false);
+   
+         // Luodaan tapahtumaolio
+         Statement stmt = yhteys.createStatement();
+         
+         // Haetaan XML-dokumentti muuttujaan
+         builder = factory.newDocumentBuilder();
+         doc = builder.parse("XML-data.xml");
+
+         // Luodaan Xpath-olio yksittäisten tietojen noutamista varten
+         XPathFactory xpathFactory = XPathFactory.newInstance();
+         XPath xpath = xpathFactory.newXPath();
+         
+         // Tämä kohta on vielä vähän auki...
+   
+         // Sitoudutaan muutoksiin
+         yhteys.commit();
+         yhteys.setAutoCommit(true);
+         
+         // Suljetaan tapahtumaolio
+         stmt.close();
+         
+      } catch (ParserConfigurationException | SAXException | IOException | SQLException poikkeus) {
+         
+         System.out.println("XML-datan lukeminen epäonnistui: " + poikkeus.getMessage());  
+
+         try {
+            
+            // Perutaan tapahtuma
+            yhteys.rollback();
+            
+         } catch (SQLException poikkeus2) {
+            System.out.println("Tapahtuman peruutus epäonnistui: " + poikkeus2.getMessage()); 
+         }
+      }
+	}
 }
