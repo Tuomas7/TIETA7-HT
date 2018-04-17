@@ -1,0 +1,132 @@
+
+
+create schema keskus;
+SET search_path to keskus;
+SHOW SEARCH_PATH;
+
+CREATE TABLE Divari (
+	DivariID int NOT NULL,
+	Nimi varchar(50) NOT NULL,
+	Osoite varchar(80),
+	Websivu varchar(50),
+	PRIMARY KEY (DivariID)
+);
+
+CREATE TABLE Kayttaja (
+	KayttajaID int NOT NULL,
+	Nimi varchar(50) NOT NULL,
+	Salasana varchar(50) NOT NULL,
+	Rooli varchar(20) DEFAULT 'Asiakas',
+	PRIMARY KEY (KayttajaID)
+);
+
+CREATE TABLE Asiakas (
+	AsiakasID int NOT NULL,
+	Etunimi varchar(50) NOT NULL,
+Sukunimi varchar(50) NOT NULL,
+	Osoite varchar(80) NOT NULL,
+	Sahkoposti varchar(50),
+	Puhelin varchar(15),
+	Saldo decimal(10,2) DEFAULT 0.00,
+	PRIMARY KEY (AsiakasID),
+	FOREIGN KEY (AsiakasID) REFERENCES Kayttaja(KayttajaID)
+);
+
+CREATE TABLE Teos (
+	ISBN varchar(13) NOT NULL,
+	Nimi varchar(50) NOT NULL,
+	Tekija varchar(50),
+	Vuosi int,
+	Tyyppi varchar(30),
+	Luokka varchar(30),
+	Paino int NOT NULL,
+	PRIMARY KEY (ISBN)
+);
+
+
+CREATE TABLE TeosKappale (
+	KappaleID int NOT NULL,
+	ISBN varchar(13) NOT NULL,
+	Hinta decimal(10,2) NOT NULL,
+	Ostohinta decimal(10,2) DEFAULT 0.00,
+	MyyntiPvm date,
+	Vapaus varchar(10) DEFAULT 'Vapaa',
+	PRIMARY KEY (KappaleID),
+	FOREIGN KEY (ISBN) REFERENCES Teos(ISBN)
+);
+
+CREATE TABLE Sijainti (
+	DivariID int NOT NULL,
+KappaleID int NOT NULL,
+	PRIMARY KEY (DivariID, KappaleID),
+	FOREIGN KEY (DivariID) REFERENCES Divari(DivariID),
+	FOREIGN KEY (KappaleID) REFERENCES TeosKappale(KappaleID)
+);
+
+CREATE TABLE Tilaus (
+	DivariID int NOT NULL,
+AsiakasID int NOT NULL,
+KappaleID int NOT NULL,
+Tila varchar(10) DEFAULT 'Käynnissä',
+	PRIMARY KEY (DivariID, AsiakasID, KappaleID),
+	FOREIGN KEY (AsiakasID) REFERENCES Asiakas(AsiakasID),
+	FOREIGN KEY (DivariID) REFERENCES Divari(DivariID),
+	FOREIGN KEY (KappaleID) REFERENCES TeosKappale(KappaleID)
+);
+
+
+create schema D1;
+create schema D3;
+
+GRANT ALL PRIVILEGES ON table keskus.asiakas TO testuser;
+GRANT ALL PRIVILEGES ON table keskus.kayttaja TO testuser;
+GRANT ALL PRIVILEGES ON table keskus.teos TO testuser;
+GRANT ALL PRIVILEGES ON table keskus.teoskappale TO testuser;
+GRANT ALL PRIVILEGES ON table keskus.tilaus TO testuser;
+GRANT ALL PRIVILEGES ON table keskus.sijainti TO testuser;
+
+GRANT ALL PRIVILEGES ON SCHEMA keskus TO GROUP testuser;
+
+
+INSERT INTO keskus.divari VALUES(1,'testi','jokukatu','www.fi');
+INSERT INTO keskus.divari VALUES(2,'testi1','muukatu','www.se');
+INSERT INTO keskus.divari VALUES(3,'testi2','asdkatu','www.com');
+
+
+INSERT INTO keskus.teos VALUES(12345,'sieppari','Arto',1984,'jannitys','romaani',40);
+INSERT INTO keskus.teos VALUES(12325,'homeros','Esko',2000,'huumori','romaani',300);
+INSERT INTO keskus.teos VALUES(13345,'länsirintama','Simo',1800,'tietokirja','kaskut',400);
+INSERT INTO keskus.teos VALUES(16345,'ajan lyhyt historia','Lauri',2010,'vitsit','romaani',80);
+INSERT INTO keskus.teos VALUES(72345,'täällä pohjantähden alla','Sepi',1987,'historia','romaani',40);
+INSERT INTO keskus.teos VALUES(92345,'why','Kuka',1989,'jannitys','pokkari',100);
+
+
+INSERT INTO keskus.teoskappale VALUES(1,12345,22,19,'10-10-1986');
+INSERT INTO keskus.teoskappale VALUES(2,12345,22,10,'10-10-1986');
+INSERT INTO keskus.teoskappale VALUES(3,13345,12,10,'10-10-1986');
+INSERT INTO keskus.teoskappale VALUES(4,13345,22,17,'10-10-1986');
+INSERT INTO keskus.teoskappale VALUES(5,12345,32,10,'10-10-1986');
+INSERT INTO keskus.teoskappale VALUES(6,12345,22,10,'10-10-1986');
+INSERT INTO keskus.teoskappale VALUES(7,16345,22,10,'10-10-1986');
+INSERT INTO keskus.teoskappale VALUES(8,12345,22,10,'10-10-1986');
+INSERT INTO keskus.teoskappale VALUES(9,16345,22,10,'10-10-1986');
+INSERT INTO keskus.teoskappale VALUES(10,72345,22,10,'10-10-1986');
+INSERT INTO keskus.teoskappale VALUES(11,92345,22,10,'10-10-1986');
+INSERT INTO keskus.teoskappale VALUES(12,92345,22,10,'10-10-1986');
+
+
+
+
+INSERT INTO keskus.sijainti VALUES(1,1);
+INSERT INTO keskus.sijainti VALUES(1,2);
+INSERT INTO keskus.sijainti VALUES(1,3);
+INSERT INTO keskus.sijainti VALUES(1,4);
+INSERT INTO keskus.sijainti VALUES(2,5);
+INSERT INTO keskus.sijainti VALUES(2,6);
+INSERT INTO keskus.sijainti VALUES(2,7);
+INSERT INTO keskus.sijainti VALUES(3,8);
+INSERT INTO keskus.sijainti VALUES(3,9);
+INSERT INTO keskus.sijainti VALUES(3,10);
+INSERT INTO keskus.sijainti VALUES(1,11);
+INSERT INTO keskus.sijainti VALUES(1,12);
+
