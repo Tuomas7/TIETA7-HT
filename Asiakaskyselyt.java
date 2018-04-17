@@ -26,6 +26,7 @@ public class Asiakaskyselyt{
 	private String haeTeosTekijat;
 	private String haeTeosLuokat;
 	private String haeTeosTyypit;
+	private String haeTeosKaikki;
 
 	// Tietorakenteet, joihin tallennetaan kyselyiden tuloksia luokan sisällä ja joita luokan metodit palauttavat
 	private HashMap<String, String> kyselyMap;
@@ -59,10 +60,10 @@ public class Asiakaskyselyt{
 		this.insertKayttaja = "INSERT INTO kayttaja VALUES (?,?,?,?)";
 		this.insertAsiakas = "INSERT INTO asiakas VALUES (?,?,?,?,?,?)";
 		this.haeTeosNimet = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM teos NATURAL JOIN teoskappale WHERE nimi LIKE ?";
-		this.haeTeosTekijat = "SELECT nimi,tekija,luokka FROM teos WHERE tekija = ?";
-		this.haeTeosLuokat = "SELECT nimi,tekija,luokka FROM teos WHERE luokka = ?";
-		this.haeTeosTyypit = "SELECT nimi,tekija,luokka FROM teos WHERE tyyppi = ?";
-
+		this.haeTeosTekijat = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM teos NATURAL JOIN teoskappale WHERE tekija LIKE ?";
+		this.haeTeosLuokat = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM teos NATURAL JOIN teoskappale WHERE luokka LIKE ?";
+		this.haeTeosTyypit = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM teos NATURAL JOIN teoskappale WHERE tyyppi LIKE ?";
+		this.haeTeosKaikki = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM teos NATURAL JOIN teoskappale WHERE nimi LIKE ? OR tekija LIKE ? OR luokka LIKE ? OR tyyppi LIKE ?";
 	}
 
 	public boolean tunnusVarattu(String tunnus){
@@ -299,10 +300,20 @@ public class Asiakaskyselyt{
 			this.preparedStatement = this.connection.prepareStatement(this.haeTeosLuokat);
 		}else if(this.input1.equals("tyyppi")){
 			this.preparedStatement = this.connection.prepareStatement(this.haeTeosTyypit);
+		}else if(this.input1.equals("kaikki")){
+			this.preparedStatement = this.connection.prepareStatement(this.haeTeosKaikki);
 		}
 
+		if(this.input1.equals("kaikki")){
+			this.preparedStatement.setString(1,'%'+this.input2+'%');
+			this.preparedStatement.setString(2,'%'+this.input2+'%');
+			this.preparedStatement.setString(3,'%'+this.input2+'%');
+			this.preparedStatement.setString(4,'%'+this.input2+'%');
 
-		this.preparedStatement.setString(1,'%'+this.input2+'%');
+		}else{
+			this.preparedStatement.setString(1,'%'+this.input2+'%');
+		}
+		
 
 		this.resultset = this.preparedStatement.executeQuery();
 
