@@ -27,6 +27,11 @@ public class Asiakaskyselyt{
 	private String haeTeosLuokat;
 	private String haeTeosTyypit;
 	private String haeTeosKaikki;
+	private String keskusdivariVaraus;
+	private String haeDivariID;
+	private String yksittainendivariVaraus;
+	private String lisaaVaraus;
+	private String haeVaraukset;
 
 	// Tietorakenteet, joihin tallennetaan kyselyiden tuloksia luokan sisällä ja joita luokan metodit palauttavat
 	private HashMap<String, String> kyselyMap;
@@ -37,6 +42,7 @@ public class Asiakaskyselyt{
 	private HashMap<String,ArrayList<String>> teoskysely;
 
 	// Aputietorakenteita, näihin asetetaan luokan metodeihin tulleita parametrien arvoja
+	private int asiakasID;
 	private String input1;
 	private String input2;
 	private int paramInt;
@@ -47,6 +53,7 @@ public class Asiakaskyselyt{
 
 	// Kontruktori, asetetaan prepared statementtien rungot
 	public Asiakaskyselyt(){
+		this.asiakasID = 0;
 		this.yhteys = new Yhteys("localhost", 5432, "bookstore", "testuser", "12345");
 		this.connection = null;
 		this.resultset = null;
@@ -55,15 +62,30 @@ public class Asiakaskyselyt{
 		this.haeKayttajaTiedotStatement = "SELECT nimi,kayttajaid,salasana,rooli FROM kayttaja WHERE kayttajaid = ?";
 		this.haeAsiakasTiedotStatement = "SELECT etunimi,sukunimi,osoite,sahkoposti,puhelin,saldo FROM asiakas WHERE asiakasid = ?";
 		this.kirjautumisStatement = "SELECT nimi,kayttajaid,rooli FROM kayttaja WHERE salasana =?";
+		
+		// Rekisteröinnin statementit
 		this.luoIDStatement = "SELECT kayttajaid FROM kayttaja";
 		this.tarkastaNimiStatement = "SELECT nimi FROM kayttaja";
 		this.insertKayttaja = "INSERT INTO kayttaja VALUES (?,?,?,?)";
 		this.insertAsiakas = "INSERT INTO asiakas VALUES (?,?,?,?,?,?)";
+
+		// Haun statementit
 		this.haeTeosNimet = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM teos NATURAL JOIN teoskappale WHERE nimi LIKE ?";
 		this.haeTeosTekijat = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM teos NATURAL JOIN teoskappale WHERE tekija LIKE ?";
 		this.haeTeosLuokat = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM teos NATURAL JOIN teoskappale WHERE luokka LIKE ?";
 		this.haeTeosTyypit = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM teos NATURAL JOIN teoskappale WHERE tyyppi LIKE ?";
 		this.haeTeosKaikki = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM teos NATURAL JOIN teoskappale WHERE nimi LIKE ? OR tekija LIKE ? OR luokka LIKE ? OR tyyppi LIKE ?";
+
+		// Varaustapahtuman statementit
+		this.keskusdivariVaraus = "UPDATE keskus.TeosKappale SET Vapaus='Varattu' WHERE KappaleID=?";
+		this.haeDivariID = "SELECT DivariID FROM keskus.sijainti WHERE KappaleID=?";
+		this.yksittainendivariVaraus ="UPDATE D?.TeosKappale SET Vapaus='Varattu' WHERE KappaleID=?";
+		this.lisaaVaraus = "INSERT INTO keskus.Tilaus VALUES (?, ?, ?', 'Käynnissä')";
+
+		this.haeVaraukset = "SELECT kappaleid, DivariID, isbn, hinta, nimi, tekija, vuosi, tyyppi, luokka, paino FROM tilaus NATURAL JOIN teoskappale NATURAL JOIN teos WHERE asiakasid = ? AND tila = 'Kaynnissa'";
+	}
+	public void asetaID(int id){
+		this.asiakasID = id;
 	}
 
 	public boolean tunnusVarattu(String tunnus){
@@ -149,6 +171,25 @@ public class Asiakaskyselyt{
 
 	}
 
+	public HashMap<String,ArrayList<String>> haeVaraukset(int id){
+
+		this.teoskysely = new HashMap<String,ArrayList<String>>();
+		this.asiakasID = asiakasID;
+		this.moodi = "haevaraukset";
+		this.yhteysHandleri();
+
+		return teoskysely;
+	}
+
+	public void lisaaVaraus(int ID){
+		this.asiakasID = asiakasID;
+		this.moodi = "lisaavaraus";
+		this.yhteysHandleri();
+		
+
+
+	}
+
 	// Yhteinen "yhteyshandleri" kyselyille, joka hoitaa yhteyksien avaamiset ja sulkemiset
 	// kyselyn tulokset tallennetaan oliomuuttujiin (HashMap, ArrayList, int)
 	private void yhteysHandleri(){
@@ -175,11 +216,18 @@ public class Asiakaskyselyt{
 
 			}else if(this.moodi.equals("haeteoksia")){
 				this.teoshaku();
+
+			}else if(this.moodi.equals("lisaavaraus")){
+				this.varauksenLisays();
+
+			}else if(this.moodi.equals("haevaraukset")){
+				this.varauksienHaku();
 			}
 	
 
 		}catch(SQLException poikkeus) {
         	System.out.println("Tapahtui seuraava virhe: " + poikkeus.getMessage());  
+        	// Tähän iffeillä kullekin omat virheet?
 
       	}finally {
     		if (this.resultset != null) {
@@ -360,6 +408,53 @@ public class Asiakaskyselyt{
 			if(this.resultset.getString("nimi").equals(this.input1)){
 				this.kyselybool = false;
 			}
+		}
+	}
+
+	public void varauksenLisays() throws SQLException{
+
+		// Varaus keskuskantaan
+		this.preparedStatement = this.connection.prepareStatement(this.keskusdivariVaraus);
+		this.preparedStatement.setInt(1,this.paramInt);
+		this.preparedStatement.executeUpdate();
+
+		// Hae divariId
+		this.preparedStatement = this.connection.prepareStatement(this.haeDivariID);
+		this.preparedStatement.setInt(1,this.paramInt);
+		
+		this.resultset = this.preparedStatement.executeQuery();
+
+		int divariID = 0;
+		while(this.resultset.next()){
+			divariID = this.resultset.getInt("DivariID");
+		}
+
+		if (divariID != 2 && divariID != 4) {
+            this.preparedStatement = this.connection.prepareStatement(this.yksittainendivariVaraus);
+            this.preparedStatement.setInt(1,divariID);
+            this.preparedStatement.setInt(2,this.paramInt);
+			this.preparedStatement.executeUpdate();
+       	}
+
+       	this.preparedStatement = this.connection.prepareStatement(this.lisaaVaraus);
+       	this.preparedStatement.setInt(1,divariID);
+       	this.preparedStatement.setInt(2,this.asiakasID);
+       	this.preparedStatement.setInt(3,this.paramInt);
+
+       	System.out.println("Kappale lisätty ostoskoriin.");
+
+
+
+	}
+
+	public void varauksienHaku() throws SQLException{
+
+		this.preparedStatement = this.connection.prepareStatement(this.haeVaraukset);
+		this.preparedStatement.setInt(1,this.asiakasID);
+		this.resultset = this.preparedStatement.executeQuery();
+
+		while(this.resultset.next()){
+			System.out.println("löytyykö jotain");
 		}
 	}
 	

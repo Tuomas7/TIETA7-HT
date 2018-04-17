@@ -134,7 +134,6 @@ public class Kirjakauppa{
 
 			if(syote.equals("1")){
 				System.out.println("Haetaan teoksia:");
-
 				istunto.haeTeoksia();
 
 			}else if(syote.equals("2")){

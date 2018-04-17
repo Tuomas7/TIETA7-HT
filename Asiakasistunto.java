@@ -26,6 +26,7 @@ public class Asiakasistunto{
 		this.lukija = new Scanner(System.in);
 		this.id=id;
 		this.kyselyt = new Asiakaskyselyt();
+		this.kyselyt.asetaID(this.id);
 		this.asiakastiedot = this.kyselyt.haeKayttajanTiedot(this.id);
 		this.nimi = this.asiakastiedot.get("etunimi")+" "+this.asiakastiedot.get("sukunimi");
 		// Tyhjä lista, merkkijonoille, joilla on tehty hakuja 
@@ -104,6 +105,7 @@ public class Asiakasistunto{
 	}
 
 	public void tulostaOstoskori(){
+		this.ostoskori = haeOstoskori();
 		if(this.ostoskori.size() == 0){
 			System.out.println("Ostoskori on tyhjä.");
 		}else{
@@ -247,12 +249,26 @@ public class Asiakasistunto{
 
 	public boolean lisaaKoriin(){
 
+
 		System.out.println("Syötä hakutuloksessa näkyvä rivin ensimmäinen numero:\n> ");
 		String hakuid = lukija.nextLine();
-		System.out.println(this.teoshakutulokset.get(hakuid));
-		this.ostoskori.put(hakuid,this.teoshakutulokset.get(hakuid));
+		
+		this.kyselyt.lisaaVaraus(Integer.parseInt(hakuid));
+		this.paivitaOstoskori();
+
 		return true;
+
+		
+		//System.out.println(this.teoshakutulokset.get(hakuid));
+		//this.ostoskori.put(hakuid,this.teoshakutulokset.get(hakuid));
+		//return true;
 	} 
+
+	public void paivitaOstoskori(){
+		this.ostoskori = this.kyselyt.haeVaraukset(this.id);
+
+
+	}
 
 
 
