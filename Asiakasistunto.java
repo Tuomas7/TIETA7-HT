@@ -110,11 +110,17 @@ public class Asiakasistunto{
 		if(this.ostoskori.size() == 0){
 			System.out.println("Ostoskori on tyhjä.");
 		}else{
-			System.out.println("asf");
 			for(int i = 1 ; i < this.ostoskori.size()+1; i++){
-				System.out.println(this.ostoskori.get(String.valueOf(i)));
+				System.out.format("%30s",this.teoshakutulokset.get(String.valueOf(i)).get(2));
+				System.out.format("%30s",this.teoshakutulokset.get(String.valueOf(i)).get(3));
+				/*
+				for(int j = 0; j<this.ostoskori.get(String.valueOf(i)).size();j++){
+					
+				}
+				*/
+				//System.out.println(this.ostoskori.get(String.valueOf(i)));
 			}
-			
+			//[1, 12345, sieppari, Arto, 1984, jannitys, romaani, 40, 22.00]
 		}
 	}
 

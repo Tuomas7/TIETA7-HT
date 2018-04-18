@@ -541,25 +541,30 @@ public class Asiakaskyselyt{
 
 
 		// Käydään ostoskorin teokset läpi
-		for(int i = 1; i < this.teoskysely.size();i++){
+		for(int i = 1; i < this.teoskysely.size()+1;i++){
 
 			// Muunna int Merkkijonoksi, jolla päästään käsiksi mapin avaimiin.
 			String indeksi = String.valueOf(i);
 
 			// Hae arraylistista teoksen kappaleid indeksistä 0
 			int teosid = Integer.parseInt(this.teoskysely.get(indeksi).get(0));
-
+			System.out.println(teosid);
 			this.preparedStatement = this.connection.prepareStatement(this.myynti);
 			this.preparedStatement.setInt(1,teosid);
 			this.preparedStatement.executeUpdate();
-
+			
 			// Haetaan divarin ID, jossa teos myynnissä.
 			this.preparedStatement = this.connection.prepareStatement(this.haeDivariID);
 			this.preparedStatement.setInt(1,teosid);
 			this.resultset = this.preparedStatement.executeQuery();
+			
 
 			// Haetaan kappaleen omistavan alkuperäisen divarin ID
-			int divariID = this.resultset.getInt(1);
+			int divariID=0;
+			while(this.resultset.next()){
+				 divariID = this.resultset.getInt("DivariID");
+			}
+		
 
 			// Jos divari ei kuulu keskustietokantaan, asetetaan kappale myydyksi/vapaaksi myös siellä
 			if (divariID != 2 && divariID != 4) {
@@ -602,7 +607,11 @@ public class Asiakaskyselyt{
 			this.resultset = this.preparedStatement.executeQuery();
 
 			// Haetaan kappaleen omistavan alkuperäisen divarin ID
-			int divariID = this.resultset.getInt(1);
+			// Haetaan kappaleen omistavan alkuperäisen divarin ID
+			int divariID=0;
+			while(this.resultset.next()){
+				 divariID = this.resultset.getInt("DivariID");
+			}
 
 			// Jos divari ei kuulu keskustietokantaan, asetetaan kappale myydyksi/vapaaksi myös siellä
 			if (divariID != 2 && divariID != 4) {
