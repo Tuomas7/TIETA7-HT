@@ -78,10 +78,10 @@ public class Asiakaskyselyt{
 
 		// Haun statementit
 		this.haeTeosNimet = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE nimi LIKE ? AND vapaus = 'Vapaa'";
-		this.haeTeosTekijat = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE tekija LIKE ? vapaus = 'Vapaa'";
-		this.haeTeosLuokat = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE luokka LIKE ? vapaus = 'Vapaa'";
-		this.haeTeosTyypit = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE tyyppi LIKE ? vapaus = 'Vapaa'";
-		this.haeTeosKaikki = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE nimi LIKE ? OR tekija LIKE ? OR luokka LIKE ? OR tyyppi LIKE ? vapaus = 'Vapaa'";
+		this.haeTeosTekijat = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE tekija LIKE ? AND vapaus = 'Vapaa'";
+		this.haeTeosLuokat = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE luokka LIKE ? AND vapaus = 'Vapaa'";
+		this.haeTeosTyypit = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE tyyppi LIKE ? AND vapaus = 'Vapaa'";
+		this.haeTeosKaikki = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE nimi LIKE ? OR tekija LIKE ? OR luokka LIKE ? OR tyyppi LIKE ? AND vapaus = 'Vapaa'";
 
 		// Varaustapahtuman statementit
 		this.keskusdivariVaraus = "UPDATE keskus.teoskappale SET Vapaus='Varattu' WHERE KappaleID=?";
