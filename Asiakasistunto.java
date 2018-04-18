@@ -216,10 +216,10 @@ public class Asiakasistunto{
       		String avain = String.valueOf(i);
       		//System.out.println(haut.get(avain));
       		System.out.format("%5s",avain);
-      		for(int j = 0 ; j<this.teoshakutulokset.get(avain).size();j++){
-      			if(j==1 || j==2){
+      		for(int j = 1 ; j<this.teoshakutulokset.get(avain).size();j++){
+      			if(j==2 || j==3){
       				System.out.format("%30s",this.teoshakutulokset.get(avain).get(j));
-      			}else if(j==6 || j==7){
+      			}else if(j==7 || j==8){
       				System.out.format("%10s",this.teoshakutulokset.get(avain).get(j));
       			}else{
       				System.out.format("%15s",this.teoshakutulokset.get(avain).get(j));
@@ -274,6 +274,80 @@ public class Asiakasistunto{
 
 	public void tilaaTuotteet(){
 
+		System.out.println("Ostoskorin sisältö:");
+		this.tulostaOstoskori();
+
+		String vastaus = "";
+		System.out.println("Haluatko varmasti siirtyä tilauksen tekemiseen? (k/e)");
+
+		while(!(vastaus.equals("k") || vastaus.equals("e") || vastaus.equals("K")|| vastaus.equals("E"))){
+			vastaus = lukija.nextLine();
+			if(vastaus.equals("k") || vastaus.equals("K")){
+				break;
+			}else if(vastaus.equals("e") || vastaus.equals("E")){
+				return;
+			}else{
+				System.out.println("Virheellinen komento!");
+			}
+		}
+
+        // Kirjojen kokonaispaino
+        int kokoPaino = 0;
+            
+        System.out.println("Tilataan seuraavat kirjat:");
+        System.out.println();
+
+        // Tilauserien lukumäärä
+         int eraLkm = 1;
+         
+         // Lasketaan, moneenko erään tilaus täytyy jakaa (yksi erä on maksimissaan 2000 grammaa)
+         while (kokoPaino > 2000) {
+            eraLkm++;
+            kokoPaino -= 2000;
+         }
+         
+         if (eraLkm > 1) {
+            System.out.println();
+            System.out.println("Tilaus jaetaan painon vuoksi " + eraLkm + " erään.");
+         }
+         
+         // Postikulujen summa
+         float postikulut = 0;
+         
+         // Jokainen 2000 grammaa painava erä maksaa 14 euroa
+         postikulut += (eraLkm-1)*14.00;
+         
+         // Lasketaan yli menevän osan postikulut
+         if (kokoPaino <= 50) {
+            postikulut += 1.40;
+         }
+         else if (kokoPaino <= 100) {
+            postikulut += 2.10;
+         }
+         else if (kokoPaino <= 250) {
+            postikulut += 2.80;
+         }
+         else if (kokoPaino <= 500) {
+            postikulut += 5.60;
+         }
+         else if (kokoPaino <= 1000) {
+            postikulut += 8.40;
+         }
+         else {
+            postikulut += 14.00;
+         }
+         
+         System.out.println();
+         System.out.println("Tilauksen postikulut ovat " + postikulut + " euroa. Vahvistetaanko tilaus? (k/e)");
+
+        char valinta = this.lukija.next().charAt(0);
+        // Kysytään valintaa niin kauan, että asiakas syöttää k:n tai e:n
+        while (valinta != 'k' && valinta != 'K' && valinta != 'e' && valinta != 'E') {
+        	System.out.println("Virheellinen valinta. Syötä joko k tai e:");
+        	valinta = this.lukija.next().charAt(0);
+       	}
+       	this.kyselyt.teeTilaus(this.ostoskori);
+         
 	}
 
 

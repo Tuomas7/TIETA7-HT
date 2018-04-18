@@ -33,7 +33,12 @@ public class Asiakaskyselyt{
 	private String yksittainendivariVaraus;
 	private String lisaaVaraus;
 	private String haeVaraukset;
-	private String tilaaTuotteet;
+	//private String tilaaTuotteet;
+	private String tilausSuoritus;
+	private String tilausPeruutus;
+	private String myynti;
+	private String vapautus;
+
 
 	// Tietorakenteet, joihin tallennetaan kyselyiden tuloksia luokan sisällä ja joita luokan metodit palauttavat
 	private HashMap<String, String> kyselyMap;
@@ -87,7 +92,16 @@ public class Asiakaskyselyt{
 		this.haeVaraukset = "SELECT kappaleid, DivariID, isbn, hinta, nimi, tekija, vuosi, tyyppi, luokka, paino FROM keskus.tilaus NATURAL JOIN keskus.teoskappale NATURAL JOIN keskus.teos WHERE asiakasid = ? AND tila = 'Käynnissä'";
 
 		// Tilaus statement
-		this.tilaaTuotteet = "";
+		//his.tilaaTuotteet = "SELECT Teos.Nimi, Teos.Paino, TeosKappale.KappaleID FROM keskus.Tilaus NATURAL JOIN keskus.TeosKappale NATURAL JOIN keskus.Teos WHERE Tilaus.Tila='Käynnissä' AND Tilaus.AsiakasID=?";
+
+		// Asetetaan tilaus suoritetuksi/peruutetuksi
+        this.tilausSuoritus = "UPDATE keskus.Tilaus SET Tila='Suoritettu' WHERE KappaleID=?";
+        this.tilausPeruutus = "UPDATE keskus.Tilaus SET Tila='Peruutettu' WHERE KappaleID=?";
+               
+        // Asetetaan keskusdivarissa oleva kappale myydyksi/vapaaksi
+        this.myynti = "UPDATE keskus.TeosKappale SET Vapaus='Myyty' WHERE KappaleID=?";
+        this.vapautus = "UPDATE keskus.TeosKappale SET Vapaus='Vapaa' WHERE KappaleID=?";
+
 
 	}
 	public void asetaID(int id){
@@ -188,13 +202,17 @@ public class Asiakaskyselyt{
 	}
 
 	public void lisaaVaraus(int ID){
-		this.paramInt = ID;
-		this.asiakasID = asiakasID;
+		//this.paramInt = ID;
+		//this.asiakasID = asiakasID;
 		this.moodi = "lisaavaraus";
 		this.yhteysHandleri();
 		
+	}
 
-
+	public void teeTilaus(HashMap<String,ArrayList<String>> ostoskori){
+		this.teoskysely = ostoskori;
+		this.moodi = "teetilaus";
+		this.yhteysHandleri();
 	}
 
 	// Yhteinen "yhteyshandleri" kyselyille, joka hoitaa yhteyksien avaamiset ja sulkemiset
@@ -229,6 +247,9 @@ public class Asiakaskyselyt{
 
 			}else if(this.moodi.equals("haevaraukset")){
 				this.varauksienHaku();
+
+			}else if(this.moodi.equals("teetilaus")){
+				this.tilauksenTeko();
 			}
 	
 
@@ -383,15 +404,15 @@ public class Asiakaskyselyt{
 
 		this.teoskysely = new HashMap<String,ArrayList<String>>();
 
-	
+		int kyselynumero = 1;
 
 		while(this.resultset.next()){
 
-			String kyselynumero = this.resultset.getString("kappaleid");
-
+			String indeksi = String.valueOf(kyselynumero);
 			// Lisätään teoksen kaikki tiedot merkkijonoina ArrayListiin
 			ArrayList<String> teostiedot = new ArrayList<>();
 
+			teostiedot.add(this.resultset.getString("kappaleid"));
 			teostiedot.add(this.resultset.getString("isbn"));
 			teostiedot.add(this.resultset.getString("nimi"));
 			teostiedot.add(this.resultset.getString("tekija"));
@@ -403,7 +424,8 @@ public class Asiakaskyselyt{
 			
 			
 			// Lisätään tiedot HashMappiin, avaimena kyselynumero, arvona arraylist
-			this.teoskysely.put(kyselynumero,teostiedot);
+			this.teoskysely.put(indeksi,teostiedot);
+			kyselynumero = kyselynumero +1;
 			
 		}
 
@@ -484,12 +506,13 @@ public class Asiakaskyselyt{
 		this.resultset = this.preparedStatement.executeQuery();
 		System.out.println("koo");
 
+		int kyselynumero = 1;
 		while(this.resultset.next()){
-			String kyselynumero = this.resultset.getString("kappaleid");
+			
 
 			// Lisätään teoksen kaikki tiedot merkkijonoina ArrayListiin
 			ArrayList<String> teostiedot = new ArrayList<>();
-
+			teostiedot.add(this.resultset.getString("kappaleid"));
 			teostiedot.add(this.resultset.getString("isbn"));
 			teostiedot.add(this.resultset.getString("nimi"));
 			teostiedot.add(this.resultset.getString("tekija"));
@@ -501,7 +524,8 @@ public class Asiakaskyselyt{
 			System.out.println("toka");
 			
 			// Lisätään tiedot HashMappiin, avaimena kyselynumero, arvona arraylist
-			this.teoskysely.put(kyselynumero,teostiedot);
+			this.teoskysely.put(String.valueOf(kyselynumero),teostiedot);
+			kyselynumero = kyselynumero+1;
 	
 		}
 	}
@@ -511,131 +535,95 @@ public class Asiakaskyselyt{
     * Rooli: Asiakas
     * Parametrit: yhteys, tilausta tekevän asiakkaan sessio
     */
-	/*
-	public void teeTilaus() throws SQLException{
+	private void tilauksenTeko() throws SQLException{
 
 		this.connection.setAutoCommit(false);
 
-		this.preparedStatement = this.connection.prepareStatement(this.tilaaTuotteet);
-		this.preparedStatement.setInt(1,this.asiakasID);
-		this.resultset = this.preparedStatement.
 
-		// tästä puuttuu
+		// Käydään ostoskorin teokset läpi
+		for(int i = 1; i < this.teoskysely.size();i++){
 
-		// Oskoskorissa olevien kappaleiden ID-arvot
-         Stack<Integer> teosKappaleet = new Stack<Integer>();
-            
-         // Kirjojen kokonaispaino
-         int kokoPaino = 0;
-            
-         System.out.println("Tilataan seuraavat kirjat:");
-         System.out.println();
-            
-         while (rset.next()) {
-            System.out.println(rset.getString(1));
-            teosKappaleet.push(rset.getInt(3));
-            kokoPaino += rset.getInt(2);
-         }
-         
-         // Tilauserien lukumäärä
-         int eraLkm = 1;
-         
-         // Lasketaan, moneenko erään tilaus täytyy jakaa (yksi erä on maksimissaan 2000 grammaa)
-         while (kokoPaino > 2000) {
-            eraLkm++;
-            kokoPaino -= 2000;
-         }
-         
-         if (eraLkm > 1) {
-            System.out.println();
-            System.out.println("Tilaus jaetaan painon vuoksi " + eraLkm + " erään.");
-         }
-         
-         // Postikulujen summa
-         float postikulut = 0;
-         
-         // Jokainen 2000 grammaa painava erä maksaa 14 euroa
-         postikulut += (eraLkm-1)*14.00;
-         
-         // Lasketaan yli menevän osan postikulut
-         if (kokoPaino <= 50) {
-            postikulut += 1.40;
-         }
-         else if (kokoPaino <= 100) {
-            postikulut += 2.10;
-         }
-         else if (kokoPaino <= 250) {
-            postikulut += 2.80;
-         }
-         else if (kokoPaino <= 500) {
-            postikulut += 5.60;
-         }
-         else if (kokoPaino <= 1000) {
-            postikulut += 8.40;
-         }
-         else {
-            postikulut += 14.00;
-         }
-         
-         System.out.println();
-         System.out.println("Tilauksen postikulut ovat " + postikulut + " euroa. Vahvistetaanko tilaus? (k/e)");
-         
-         char valinta = scanner.next().charAt(0);
-         
-         // Kysytään valintaa niin kauan, että asiakas syöttää k:n tai e:n
-         while (valinta != 'k' && valinta != 'K' && valinta != 'e' && valinta != 'E') {
-            System.out.println("Virheellinen valinta. Syötä joko k tai e:");
-            valinta = scanner.next().charAt(0);
-         }
-            
-         String tila = "";
-         String vapaus = "";
-         
-         // Asetetaan teosten tila ja vapaus valinnan perusteella
-         if (valinta == 'k' || valinta == 'K') {
-            tila = "Suoritettu";
-            vapaus = "Myyty";
-         }
-         else {
-            tila = "Peruutettu";
-            vapaus = "Vapaa";
-         }
+			// Muunna int Merkkijonoksi, jolla päästään käsiksi mapin avaimiin.
+			String indeksi = String.valueOf(i);
 
-         // Käydään läpi kaikki ostoskorissa olevat teoskappaleet
-         while (!(teosKappaleet.isEmpty())) {
-               
-            int kappaleID = teosKappaleet.pop();
-               
-            // Asetetaan tilaus suoritetuksi/peruutetuksi
-            stmt.executeUpdate("UPDATE keskus.Tilaus SET Tila='" + tila + "' WHERE KappaleID=" + kappaleID);
-               
-            // Asetetaan keskusdivarissa oleva kappale myydyksi/vapaaksi
-            stmt.executeUpdate("UPDATE keskus.TeosKappale SET Vapaus='" + vapaus + "' WHERE KappaleID=" + kappaleID);
-               
-            // Haetaan kappaleen omistavan alkuperäisen divarin ID
-            ResultSet rset2 = stmt.executeQuery("SELECT DivariID FROM keskus.sijainti WHERE KappaleID=" + kappaleID);
-            int divariID = rset2.getInt(1);
-         
-            // Jos divari ei kuulu keskustietokantaan, asetetaan kappale myydyksi/vapaaksi myös siellä
-            if (divariID != 2 && divariID != 4) {
-               stmt.executeUpdate("UPDATE D" + divariID + ".TeosKappale SET Vapaus='" + vapaus + "' WHERE KappaleID=" + kappaleID);
+			// Hae arraylistista teoksen kappaleid indeksistä 0
+			int teosid = Integer.parseInt(this.teoskysely.get(indeksi).get(0));
+
+			this.preparedStatement = this.connection.prepareStatement(this.myynti);
+			this.preparedStatement.setInt(1,teosid);
+			this.preparedStatement.executeUpdate();
+
+			// Haetaan divarin ID, jossa teos myynnissä.
+			this.preparedStatement = this.connection.prepareStatement(this.haeDivariID);
+			this.preparedStatement.setInt(1,teosid);
+			this.resultset = this.preparedStatement.executeQuery();
+
+			// Haetaan kappaleen omistavan alkuperäisen divarin ID
+			int divariID = this.resultset.getInt(1);
+
+			// Jos divari ei kuulu keskustietokantaan, asetetaan kappale myydyksi/vapaaksi myös siellä
+			if (divariID != 2 && divariID != 4) {
+				String myynti = "UPDATE D"+divariID+".TeosKappale SET Vapaus='Myyty' WHERE KappaleID=?";
+				this.preparedStatement=this.connection.prepareStatement(myynti);
+				this.preparedStatement.setInt(1,teosid);
+				this.preparedStatement.executeUpdate();
             }
-         }
-            
-         if (valinta == 'k' || valinta == 'K') {
-            System.out.println("Tilaus suoritettu onnistuneesti!");
-         }
-         else {
-            System.out.println("Tilaus peruutettu!");
-         }
 
-		// Sitoudutaan muutoksiin
-         this.connection.commit();
-         this.connection.setAutoCommit(true);
+            this.preparedStatement = this.connection.prepareStatement(this.tilausSuoritus);
+            this.preparedStatement.setInt(1,teosid);
+            this.preparedStatement.executeUpdate();
+		}
+		this.connection.commit();
+        this.connection.setAutoCommit(true); 
 	}
-	*/
 
 
-	
+	private void tilauksenPeruutus() throws SQLException{
+
+		this.connection.setAutoCommit(false);
+
+
+		// Käydään ostoskorin teokset läpi
+		for(int i = 1; i < this.teoskysely.size();i++){
+
+			// Muunna int Merkkijonoksi, jolla päästään käsiksi mapin avaimiin.
+			String indeksi = String.valueOf(i);
+
+			// Hae arraylistista teoksen kappaleid indeksistä 0
+			int teosid = Integer.parseInt(this.teoskysely.get(indeksi).get(0));
+
+			this.preparedStatement = this.connection.prepareStatement(this.vapautus);
+			this.preparedStatement.setInt(1,teosid);
+			this.preparedStatement.executeUpdate();
+
+			// Haetaan divarin ID, jossa teos myynnissä.
+			this.preparedStatement = this.connection.prepareStatement(this.haeDivariID);
+			this.preparedStatement.setInt(1,teosid);
+			this.resultset = this.preparedStatement.executeQuery();
+
+			// Haetaan kappaleen omistavan alkuperäisen divarin ID
+			int divariID = this.resultset.getInt(1);
+
+			// Jos divari ei kuulu keskustietokantaan, asetetaan kappale myydyksi/vapaaksi myös siellä
+			if (divariID != 2 && divariID != 4) {
+				String vapautus = "UPDATE D"+divariID+".TeosKappale SET Vapaus='Vapaa' WHERE KappaleID=?";
+				this.preparedStatement=this.connection.prepareStatement(vapautus);
+				this.preparedStatement.setInt(1,teosid);
+				this.preparedStatement.executeUpdate();
+            }
+
+            this.preparedStatement = this.connection.prepareStatement(this.tilausPeruutus);
+            this.preparedStatement.setInt(1,teosid);
+            this.preparedStatement.executeUpdate();
+		}
+		this.connection.commit();
+        this.connection.setAutoCommit(true); 
+	}
+
 }		
 
+
+
+
+               
+         

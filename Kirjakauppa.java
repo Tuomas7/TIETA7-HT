@@ -120,14 +120,16 @@ public class Kirjakauppa{
 	public static void sisaankirjausKayttaja(Asiakasistunto istunto, Scanner lukija){
 
 		String syote ="";
-		while(!syote.equals("6")){
+		while(!syote.equals("7")){
 			System.out.println("Olet kirjautuneena käyttäjänä: "+istunto.haeNimi()+"\n");
 			System.out.println("[ 1 ] Hae teoksia");
 			System.out.println("[ 2 ] Profiili");
 			System.out.println("[ 3 ] Jotain?");
 			System.out.println("[ 4 ] Ostoskori");
 			System.out.println("[ 5 ] Tulosta hakuhistoria");
-			System.out.println("[ 6 ] Kirjaudu ulos");
+			System.out.println("[ 6 ] Tilaa tuotteet");
+			System.out.println("[ 7 ] Kirjaudu ulos");
+
 			System.out.print("\n> ");
 
 			syote = lukija.nextLine();
@@ -144,6 +146,9 @@ public class Kirjakauppa{
 
 			}else if(syote.equals("5")){
 				istunto.tulostaHistoria();
+
+			}else if(syote.equals("6")){
+				istunto.tilaaTuotteet();
 			}
 
 		}
