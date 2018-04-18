@@ -77,11 +77,11 @@ public class Asiakaskyselyt{
 		this.insertAsiakas = "INSERT INTO keskus.asiakas VALUES (?,?,?,?,?,?)";
 
 		// Haun statementit
-		this.haeTeosNimet = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE nimi LIKE ?";
-		this.haeTeosTekijat = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE tekija LIKE ?";
-		this.haeTeosLuokat = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE luokka LIKE ?";
-		this.haeTeosTyypit = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE tyyppi LIKE ?";
-		this.haeTeosKaikki = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE nimi LIKE ? OR tekija LIKE ? OR luokka LIKE ? OR tyyppi LIKE ?";
+		this.haeTeosNimet = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE nimi LIKE ? AND vapaus = 'Vapaa'";
+		this.haeTeosTekijat = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE tekija LIKE ? vapaus = 'Vapaa'";
+		this.haeTeosLuokat = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE luokka LIKE ? vapaus = 'Vapaa'";
+		this.haeTeosTyypit = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE tyyppi LIKE ? vapaus = 'Vapaa'";
+		this.haeTeosKaikki = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta,vapaus FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE nimi LIKE ? OR tekija LIKE ? OR luokka LIKE ? OR tyyppi LIKE ? vapaus = 'Vapaa'";
 
 		// Varaustapahtuman statementit
 		this.keskusdivariVaraus = "UPDATE keskus.teoskappale SET Vapaus='Varattu' WHERE KappaleID=?";
@@ -197,12 +197,11 @@ public class Asiakaskyselyt{
 		this.asiakasID = asiakasID;
 		this.moodi = "haevaraukset";
 		this.yhteysHandleri();
-		System.out.println("eka");
 		return teoskysely;
 	}
 
 	public void lisaaVaraus(int ID){
-		//this.paramInt = ID;
+		this.paramInt = ID;
 		//this.asiakasID = asiakasID;
 		this.moodi = "lisaavaraus";
 		this.yhteysHandleri();
@@ -466,7 +465,9 @@ public class Asiakaskyselyt{
 
 		int divariID = 0;
 		while(this.resultset.next()){
+			System.out.println(this.resultset.getInt("DivariID"));
 			divariID = this.resultset.getInt("DivariID");
+
 		}
 
 		// Jos divari ei kuulu keskustietokantaan, asetetaan kappale varatuksi myös siellä
@@ -504,7 +505,6 @@ public class Asiakaskyselyt{
 		this.preparedStatement = this.connection.prepareStatement(this.haeVaraukset);
 		this.preparedStatement.setInt(1,this.asiakasID);
 		this.resultset = this.preparedStatement.executeQuery();
-		System.out.println("koo");
 
 		int kyselynumero = 1;
 		while(this.resultset.next()){
@@ -521,7 +521,6 @@ public class Asiakaskyselyt{
 			teostiedot.add(this.resultset.getString("luokka"));
 			teostiedot.add(this.resultset.getString("paino"));
 			teostiedot.add(this.resultset.getString("hinta"));
-			System.out.println("toka");
 			
 			// Lisätään tiedot HashMappiin, avaimena kyselynumero, arvona arraylist
 			this.teoskysely.put(String.valueOf(kyselynumero),teostiedot);

@@ -110,17 +110,20 @@ public class Asiakasistunto{
 		if(this.ostoskori.size() == 0){
 			System.out.println("Ostoskori on tyhjä.");
 		}else{
+			System.out.println("\n--------------------------------------------------------------------------------");
+			System.out.format("%30s%30s%10s%10s\n","Nimi","Tekija","Paino","Hinta");
+			System.out.println("--------------------------------------------------------------------------------");
+
 			for(int i = 1 ; i < this.ostoskori.size()+1; i++){
-				System.out.format("%30s",this.teoshakutulokset.get(String.valueOf(i)).get(2));
-				System.out.format("%30s",this.teoshakutulokset.get(String.valueOf(i)).get(3));
-				/*
-				for(int j = 0; j<this.ostoskori.get(String.valueOf(i)).size();j++){
 					
-				}
-				*/
-				//System.out.println(this.ostoskori.get(String.valueOf(i)));
+				System.out.format("%30s",this.ostoskori.get(String.valueOf(i)).get(2));
+				System.out.format("%30s",this.ostoskori.get(String.valueOf(i)).get(3));
+				System.out.format("%10s",this.ostoskori.get(String.valueOf(i)).get(7));
+				System.out.format("%10s",this.ostoskori.get(String.valueOf(i)).get(8));
+				System.out.println();
 			}
-			//[1, 12345, sieppari, Arto, 1984, jannitys, romaani, 40, 22.00]
+			System.out.println("\n");
+			
 		}
 	}
 
@@ -263,11 +266,14 @@ public class Asiakasistunto{
 	public boolean lisaaKoriin(){
 
 
-		System.out.println("Syötä hakutuloksessa näkyvä rivin ensimmäinen numero:\n> ");
+		System.out.print("Syötä hakutuloksessa näkyvä rivin ensimmäinen numero:\n> ");
 		String hakuid = lukija.nextLine();
 		
-		this.kyselyt.lisaaVaraus(Integer.parseInt(hakuid));
-	
+		String id = this.teoshakutulokset.get(hakuid).get(0);
+		System.out.println(id);
+		//this.kyselyt.lisaaVaraus(Integer.parseInt(hakuid));
+		this.kyselyt.lisaaVaraus(Integer.parseInt(id));
+
 
 		return true;
 
