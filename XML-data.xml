@@ -1,32 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
 <teokset>
 
    <teos>
       <ttiedot>
-         <isbn> 0345339738 </isbn>
-         <nimi> Kuninkaan paluu </nimi>
-         <tekija> J. R. R. Tolkien </tekija>
-         <paino> 955 </paino>
+         <isbn>0345339738</isbn>
+         <nimi>Kuninkaan paluu</nimi>
+         <tekija>J. R. R. Tolkien</tekija>
+         <paino>955</paino>
       </ttiedot>
       <nide>
-         <hinta> 23.99 </hinta>
+         <hinta>23.99</hinta>
       </nide>
       <nide>
-         <hinta> 21.50 </hinta>
+         <hinta>21.50</hinta>
       </nide>
    </teos>
 
    <teos>
       <ttiedot>
-         <isbn> 9519066578 </isbn>
-         <nimi> Tuulen viem‰‰ </nimi>
-         <tekija> Margaret Mitchell </tekija>
-         <paino> 1512 </paino>
+         <isbn>9781420922530</isbn>
+         <nimi>Hamlet</nimi>
+         <tekija>William Shakespeare</tekija>
+         <paino>276</paino>
       </ttiedot>
       <nide>
-         <hinta> 12.75 </hinta>
+         <hinta>12.75</hinta>
       </nide>
       <nide>
-         <hinta> 15.00 </hinta>
+         <hinta>15.00</hinta>
       </nide>
    </teos>
 

@@ -2,7 +2,14 @@ import java.sql.*;
 import java.util.Scanner;
 import java.util.Stack;
 import java.io.IOException;
-import javax.xml.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -37,8 +44,6 @@ public class Tapahtumat{
    
       // Kysytään käyttäjältä yksittäisen kappaleen tiedot
       System.out.println("Anna kappaleesta seuraavat tiedot:");
-      System.out.println("Yksilöivä ID-tunnus: ");
-      int id = scanner.nextInt();
       System.out.println("Myyntihinta: ");
       float hinta = scanner.nextFloat();
       System.out.println("Ostohinta: ");
@@ -57,6 +62,11 @@ public class Tapahtumat{
          // Lisätään teoksen tiedot
          stmt.executeUpdate("INSERT INTO D1.Teos VALUES ('" + isbn + "', '" + nimi + "', '"
             + tekija + "', '" + vuosi + "', '" + tyyppi + "', '" + luokka + "', '" + paino + "')");
+      
+         // Haetaan suurin kappaleID tietokannassa ja lisätään siihen 1
+         ResultSet rset = stmt.executeQuery("SELECT MAX(KappaleID) FROM D1.teosKappale");
+         rset.next();
+         int id = rset.getInt(1) + 1;
       
          // Lisätään yksittäisen kappaleen tiedot
          stmt.executeUpdate("INSERT INTO D1.TeosKappale VALUES ('" + id + "', '" + isbn + "', '"
@@ -419,6 +429,7 @@ public class Tapahtumat{
       factory.setNamespaceAware(true);
       DocumentBuilder builder;
       Document doc = null;
+      XPathExpression expr = null;
       
       try {
          
@@ -435,7 +446,53 @@ public class Tapahtumat{
          XPathFactory xpathFactory = XPathFactory.newInstance();
          XPath xpath = xpathFactory.newXPath();
          
-         // Tämä kohta on vielä vähän auki...
+         // Lasketaan teosten lukumäärä tiedostossa
+         expr = xpath.compile("count(//teos)");
+         int teosLkm = (int)(double)expr.evaluate(doc, XPathConstants.NUMBER);
+         
+         // Käydään jokainen teos läpi
+         for (int i = 1; i < (teosLkm+1); i++) {
+            
+            // Napataan talteen teoksen tiedot
+            expr = xpath.compile("//teos[" + i + "]/ttiedot/isbn/text()");
+            String isbn = (String)expr.evaluate(doc, XPathConstants.STRING);
+            
+            expr = xpath.compile("//teos[" + i + "]/ttiedot/nimi/text()");
+            String nimi = (String)expr.evaluate(doc, XPathConstants.STRING);
+            
+            expr = xpath.compile("//teos[" + i + "]/ttiedot/tekija/text()");
+            String tekija = (String)expr.evaluate(doc, XPathConstants.STRING);
+            
+            expr = xpath.compile("floor(//teos[" + i + "]/ttiedot/paino/text())");
+            int paino = (int)(double)expr.evaluate(doc, XPathConstants.NUMBER);
+            
+            // Lisätään teoksen tiedot keskustietokantaan
+            stmt.executeUpdate("INSERT INTO keskus.Teos VALUES ('" + isbn + "', '" + nimi + "', '"
+            + tekija + "', null, null, null, '" + paino + "')");
+            
+            // Lasketaan teoksesta olevien niteiden lukumäärä
+            expr = xpath.compile("count(//teos[" + i + "]/nide)");
+            int nideLkm = (int)(double)expr.evaluate(doc, XPathConstants.NUMBER);
+            
+            // Käydään jokainen nide läpi
+            for (int j = 1; j < (nideLkm+1); j++) {
+            
+               // Napataan talteen niteen hinta
+               expr = xpath.compile("number(//teos[" + i + "]/nide[" + j + "]/hinta/text())");
+               double hinta = (double)expr.evaluate(doc, XPathConstants.NUMBER);
+               
+               // Haetaan suurin kappaleID tietokannassa ja lisätään siihen 1
+               ResultSet rset = stmt.executeQuery("SELECT MAX(KappaleID) FROM keskus.teosKappale");
+               rset.next();
+               int id = rset.getInt(1) + 1;
+               
+               // Lisätään niteen tiedot keskustietokantaan
+               stmt.executeUpdate("INSERT INTO keskus.TeosKappale VALUES ('" + id + "', '" + isbn + "', '"
+                  + hinta + "', null, null, 'Vapaa')");
+            }
+         }
+
+         System.out.println("XML-data siirretty onnistuneesti keskustietokantaan!");
    
          // Sitoudutaan muutoksiin
          yhteys.commit();
@@ -444,7 +501,7 @@ public class Tapahtumat{
          // Suljetaan tapahtumaolio
          stmt.close();
          
-      } catch (ParserConfigurationException | SAXException | IOException | SQLException poikkeus) {
+      } catch (XPathExpressionException | ParserConfigurationException | SAXException | IOException | SQLException poikkeus) {
          
          System.out.println("XML-datan lukeminen epäonnistui: " + poikkeus.getMessage());  
 
