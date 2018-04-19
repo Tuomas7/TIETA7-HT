@@ -1,0 +1,11 @@
+
+- Raportit ??
+
+-T5: Tilauksen "jako" jos yli 2kg
+
+-T6: Triggerin lisäys
+
+-T7: Lokaalin tietokannan päivitys keskustietokantaan. (Tässä oli ongelma sen id:n kanssa)
+
+-T8: lokaalin divarin tietojen siirto superuserina (tämä on kai periaatteessa tehty?)
+
