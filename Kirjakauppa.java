@@ -132,7 +132,7 @@ public class Kirjakauppa{
 			}else if(syote.equals("3")){
 				//ostoskori(istunto, lukija);
 			}
-		}
+		}		
 		System.out.println("Kirjauduit ulos.");
 	}
 

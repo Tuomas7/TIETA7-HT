@@ -43,6 +43,21 @@ public class Yllapitajaistunto{
 
 		if(this.divariKeskusKannassa){
 			System.out.println("Lisätään teos keskusdivarin tietokantaan");
+			
+			System.out.println("Syötä teoksen ISBN:\n> ");
+			this.isbn = lukija.nextLine();
+			this.lisays.put("isbn",isbn);
+
+			if(this.kyselyt.haeISBNkeskus(this.isbn)){
+				System.out.println("Teostiedot löytyvät tietokannasta. Lisätään vain kappaletiedot.");
+				this.lisaaKappaletiedot();
+				this.kyselyt.lisaaKPLtiedot(this.lisays);
+			}else{
+				this.lisaaTeostiedot();
+				this.lisaaKappaletiedot();
+				this.kyselyt.lisaateosKPLtiedot(this.lisays);
+
+			}
 
 		}else{
 			System.out.println("Lisätään teos paikalliseen tietokantaan");
