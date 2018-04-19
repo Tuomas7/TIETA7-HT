@@ -106,6 +106,8 @@ public class Kirjakauppa{
 	
 	public static void sisaankirjausYllapito(Yllapitajaistunto istunto, Scanner lukija){
 
+		//istunto.haeDivariID();
+		istunto.tulosta();
 		String syote ="";
 		while(!syote.equals("4")){
 			System.out.println("------------");
@@ -121,8 +123,9 @@ public class Kirjakauppa{
 			syote = lukija.nextLine();
 
 			if(syote.equals("1")){
-				//istunto.haeTeoksia();
-
+				
+				istunto.lisaaTeos();
+				
 			}else if(syote.equals("2")){
 				//profiili(istunto, lukija);
 

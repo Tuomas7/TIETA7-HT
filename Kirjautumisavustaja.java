@@ -9,6 +9,7 @@ public class Kirjautumisavustaja{
 	private Scanner lukija;
 	private Asiakaskyselyt kysely;
 	private String rooli;
+	//private HashMap<String,ArrayList<String>> 
 
 	public Kirjautumisavustaja(String rooli){
 		this.lukija = new Scanner(System.in);
