@@ -8,16 +8,19 @@ public class Kirjautumisavustaja{
 
 	private Scanner lukija;
 	private Asiakaskyselyt kysely;
+	private String rooli;
 
-	public Kirjautumisavustaja(){
+	public Kirjautumisavustaja(String rooli){
 		this.lukija = new Scanner(System.in);
 		this.kysely = new Asiakaskyselyt();
+		this.rooli = rooli;
 	}
 
 	// Funktio kirjautumiseen
 	// @param kyselyt // Asiakaskyselyt-olio
 	// @param rooli // merkkijono kayttajan roolista ("Asiakas" tai "Ylläpitäjä")
 	// @return 
+
 	public Asiakasistunto kirjaudu(){
 
 		String tunnus ="";
@@ -42,12 +45,46 @@ public class Kirjautumisavustaja{
 		
 		//System.out.println(password);
 		
-		int id = this.kysely.tarkastaKirjautuminen(tunnus, password);
+		int id = this.kysely.tarkastaKirjautuminen(tunnus, password, this.rooli);
 
 		if(id == 0){
 			System.out.println("Käyttäjätunnus tai salasana väärin.");
 		}else{
 			istunto = new Asiakasistunto(id);
+		}
+		return istunto;	
+	}
+
+	public Yllapitajaistunto kirjauduyp(){
+
+		String tunnus ="";
+		Yllapitajaistunto istunto = null;
+		Console console = System.console() ;
+
+		System.out.println("Kirjaudutaan sisään ylläpitäjänä:");
+		System.out.print("Syötä käyttäjätunnus:\n> ");
+
+		tunnus = this.lukija.nextLine();
+		char [] salasana;
+
+		
+		salasana = console.readPassword("Anna salasana:\n> ");
+
+		StringBuilder strBuilder = new StringBuilder();
+		for (int i = 0; i < salasana.length; i++) {
+		   	strBuilder.append(salasana[i]);
+			}
+		String password = strBuilder.toString();
+		Arrays.fill(salasana,' ');
+		
+		//System.out.println(password);
+		
+		int id = this.kysely.tarkastaKirjautuminen(tunnus, password, this.rooli);
+
+		if(id == 0){
+			System.out.println("Käyttäjätunnus tai salasana väärin.");
+		}else{
+			istunto = new Yllapitajaistunto(id);
 		}
 		return istunto;	
 	}

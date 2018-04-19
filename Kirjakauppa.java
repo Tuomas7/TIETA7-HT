@@ -17,8 +17,6 @@ public class Kirjakauppa{
 		
 		Asiakaskyselyt kysely = new Asiakaskyselyt();
 
-		Kirjautumisavustaja avustaja = new Kirjautumisavustaja();
-
 		// "Clear screen"
 		System.out.print("\033[H\033[2J");
 
@@ -33,7 +31,7 @@ public class Kirjakauppa{
 
 			System.out.println("[ 1 ] Kirjaudu sisään (Asiakas)");
 			System.out.println("[ 2 ] Kirjaudu sisään (Ylläpitäjä)");
-			System.out.println("[ 3 ] Rekisteröidy");
+			System.out.println("[ 3 ] Rekisteröidy asiakkaana");
 			System.out.println("[ 4 ] Lopeta");
 			System.out.print("\n> ");
 
@@ -48,6 +46,7 @@ public class Kirjakauppa{
 			if(syote.equals("1")){
 				// "Clear screen"
 				//System.out.print("\033[H\033[2J");
+				Kirjautumisavustaja avustaja = new Kirjautumisavustaja("Asiakas");
 				Asiakasistunto istunto = null;
 				printBanner();
 				istunto = avustaja.kirjaudu();
@@ -58,18 +57,27 @@ public class Kirjakauppa{
 					sisaankirjausKayttaja(istunto, lukija);
 				}
 
-			//}
-			/*
-			else if(syote.equals("2")){
+			
+			}else if(syote.equals("2")){
 				//System.out.print("\033[H\033[2J");
-				istunto = Paavalikko.kirjaudu(lukija, yhteys, "Ylläpitäjä");
+				Kirjautumisavustaja avustaja = new Kirjautumisavustaja("Ylläpitäjä");
+				Yllapitajaistunto istunto = null;
+				istunto = avustaja.kirjauduyp();
+				
+
+
 				if(istunto !=null){
-					sisaankirjausYllapito(lukija, istunto);
+					System.out.println("onnistui");
+					sisaankirjausYllapito(istunto,lukija);
+				}else{
+					System.out.println("ei");
 				}
 			
-			*/
+			
 					
 			}else if(syote.equals("3")){
+				Kirjautumisavustaja avustaja = new Kirjautumisavustaja("Asiakas");
+			
 				//System.out.print("\033[H\033[2J");
 				kirjautuminen = avustaja.rekisteroidy();
 				//if(kirjautuminen){
@@ -78,7 +86,7 @@ public class Kirjakauppa{
 				
 			}
 			
-				}
+		}
 			
 			
 		
@@ -95,12 +103,15 @@ public class Kirjakauppa{
 	// Käyttöliittymä sisäänkirjautuneelle ylläpitäjälle
 	// @param lukija // Scanner-olio
 	// @param istunto // Sessio-olio
-	/*
-	public static void sisaankirjausYllapito(Scanner lukija, Sessio istunto){
+	
+	public static void sisaankirjausYllapito(Yllapitajaistunto istunto, Scanner lukija){
 
 		String syote ="";
 		while(!syote.equals("4")){
-			System.out.println("Olet kirjautuneena ylläpitäjänä: ");
+			System.out.println("------------");
+			System.out.println("| Ylläpito |");
+			System.out.println("------------");
+			System.out.println("Olet kirjautuneena ylläpitäjänä:\n");
 			System.out.println("[ 1 ] Lisää teoksia");
 			System.out.println("[ 2 ] Jotain muuta");
 			System.out.println("[ 3 ] Jotain muuta");
@@ -108,10 +119,19 @@ public class Kirjakauppa{
 			System.out.print("\n> ");
 
 			syote = lukija.nextLine();
+
+			if(syote.equals("1")){
+				//istunto.haeTeoksia();
+
+			}else if(syote.equals("2")){
+				//profiili(istunto, lukija);
+
+			}else if(syote.equals("3")){
+				//ostoskori(istunto, lukija);
+			}
 		}
 		System.out.println("Kirjauduit ulos.");
 	}
-	*/
 
 	// Käyttöliittymä sisäänkirjautuneelle asiakkaalle
 	// @param lukija // Scanner-olio
@@ -145,13 +165,12 @@ public class Kirjakauppa{
 
 			}else if(syote.equals("3")){
 				ostoskori(istunto, lukija);
-				//istunto.tulostaOstoskori();
+				
 				/*
 			}else if(syote.equals("5")){
 				istunto.tulostaHistoria();
 
-			}else if(syote.equals("6")){
-				istunto.tilaaTuotteet();
+			
 				*/
 			}
 		

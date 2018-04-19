@@ -53,6 +53,7 @@ public class Asiakaskyselyt{
 	private int asiakasID;
 	private String input1;
 	private String input2;
+	private String input3;
 	private int paramInt;
 	private HashMap<String,String> mapInput;
 	private double inputDouble;
@@ -70,7 +71,7 @@ public class Asiakaskyselyt{
 		
 		this.haeKayttajaTiedotStatement = "SELECT nimi,kayttajaid,salasana,rooli FROM keskus.kayttaja WHERE kayttajaid = ?";
 		this.haeAsiakasTiedotStatement = "SELECT etunimi,sukunimi,osoite,sahkoposti,puhelin,saldo FROM keskus.asiakas WHERE asiakasid = ?";
-		this.kirjautumisStatement = "SELECT nimi,kayttajaid,rooli FROM keskus.kayttaja WHERE salasana =?";
+		this.kirjautumisStatement = "SELECT nimi,kayttajaid,rooli FROM keskus.kayttaja WHERE salasana =? AND rooli = ?";
 		
 		// Rekisteröinnin statementit
 		this.luoIDStatement = "SELECT kayttajaid FROM keskus.kayttaja";
@@ -143,13 +144,14 @@ public class Asiakaskyselyt{
 	}
 
 	// Kirjautumisen yhteydessä, tarkastaa, että tunnus ja salasana täsmäävät kannassa
-	public int tarkastaKirjautuminen(String tunnus, String salasana){
+	public int tarkastaKirjautuminen(String tunnus, String salasana,String rooli){
 
 		this.kyselybool = false;
 		this.input1 = tunnus;
 		this.input2 = salasana;
+		this.input3 = rooli;
 		this.moodi = "tarkastakirjautuminen";
-		this.kyselyLista = new ArrayList<>();
+		//this.kyselyLista = new ArrayList<>();
 		
 		this.yhteysHandleri();
 
@@ -363,6 +365,7 @@ public class Asiakaskyselyt{
 
 		this.preparedStatement = this.connection.prepareStatement(this.kirjautumisStatement);
 		this.preparedStatement.setString(1,this.input2);
+		this.preparedStatement.setString(2,this.input3);
 		this.resultset = this.preparedStatement.executeQuery();
 
 		while(this.resultset.next()){
