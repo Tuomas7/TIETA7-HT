@@ -98,7 +98,8 @@ public class Asiakaskyselyt{
 
 		// Asetetaan tilaus suoritetuksi/peruutetuksi
         this.tilausSuoritus = "UPDATE keskus.Tilaus SET Tila='Suoritettu' WHERE KappaleID=?";
-        this.tilausPeruutus = "UPDATE keskus.Tilaus SET Tila='Peruutettu' WHERE KappaleID=?";
+        //this.tilausPeruutus = "UPDATE keskus.Tilaus SET Tila='Peruutettu' WHERE KappaleID=?";
+        this.tilausPeruutus = "DELETE FROM keskus.tilaus WHERE tila ='Käynnissä' AND asiakasid = ?";
                
         // Asetetaan keskusdivarissa oleva kappale myydyksi/vapaaksi
         this.myynti = "UPDATE keskus.TeosKappale SET Vapaus='Myyty' WHERE KappaleID=?";
@@ -225,6 +226,13 @@ public class Asiakaskyselyt{
 		this.yhteysHandleri();
 	}
 
+	public void tyhjennaKori(HashMap<String,ArrayList<String>> ostoskori){
+
+		this.teoskysely = ostoskori;
+		this.moodi = "perutilaus";
+		this.yhteysHandleri();
+	}
+
 	// Yhteinen "yhteyshandleri" kyselyille, joka hoitaa yhteyksien avaamiset ja sulkemiset
 	// kyselyn tulokset tallennetaan oliomuuttujiin (HashMap, ArrayList, int)
 	private void yhteysHandleri(){
@@ -260,8 +268,12 @@ public class Asiakaskyselyt{
 
 			}else if(this.moodi.equals("teetilaus")){
 				this.tilauksenTeko();
+
 			}else if(this.moodi.equals("lisaarahaa")){
 				this.rahanLisays();
+
+			}else if(this.moodi.equals("perutilaus")){
+				this.tilauksenPeruutus();
 			}
 	
 
@@ -600,10 +612,13 @@ public class Asiakaskyselyt{
 
 		this.connection.setAutoCommit(false);
 
+		this.preparedStatement = this.connection.prepareStatement(this.tilausPeruutus);
+        this.preparedStatement.setInt(1,this.asiakasID);
+        this.preparedStatement.executeUpdate();
 
 		// Käydään ostoskorin teokset läpi
-		for(int i = 1; i < this.teoskysely.size();i++){
-
+		for(int i = 1; i < this.teoskysely.size()+1;i++){
+			System.out.println("jotain");
 			// Muunna int Merkkijonoksi, jolla päästään käsiksi mapin avaimiin.
 			String indeksi = String.valueOf(i);
 
@@ -634,9 +649,7 @@ public class Asiakaskyselyt{
 				this.preparedStatement.executeUpdate();
             }
 
-            this.preparedStatement = this.connection.prepareStatement(this.tilausPeruutus);
-            this.preparedStatement.setInt(1,teosid);
-            this.preparedStatement.executeUpdate();
+            
 		}
 		this.connection.commit();
         this.connection.setAutoCommit(true); 

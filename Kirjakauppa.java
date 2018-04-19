@@ -120,7 +120,7 @@ public class Kirjakauppa{
 	public static void sisaankirjausKayttaja(Asiakasistunto istunto, Scanner lukija){
 
 		String syote ="";
-		while(!syote.equals("7")){
+		while(!syote.equals("4")){
 			System.out.println("--------------");
 			System.out.println("| Päävalikko |");
 			System.out.println("--------------");
@@ -128,11 +128,10 @@ public class Kirjakauppa{
 			System.out.println("Olet kirjautuneena käyttäjänä: "+istunto.haeNimi()+"\n");
 			System.out.println("[ 1 ] Hae teoksia");
 			System.out.println("[ 2 ] Profiili");
-			System.out.println("[ 3 ] Jotain?");
-			System.out.println("[ 4 ] Ostoskori");
-			System.out.println("[ 5 ] Tulosta hakuhistoria");
-			System.out.println("[ 6 ] Tilaa tuotteet");
-			System.out.println("[ 7 ] Kirjaudu ulos");
+			System.out.println("[ 3 ] Ostoskori");
+			//System.out.println("[ 5 ] Tulosta hakuhistoria");
+			//System.out.println("[ 6 ] Tilaa tuotteet");
+			System.out.println("[ 4 ] Kirjaudu ulos");
 
 			System.out.print("\n> ");
 
@@ -144,17 +143,18 @@ public class Kirjakauppa{
 			}else if(syote.equals("2")){
 				profiili(istunto, lukija);
 
-			}else if(syote.equals("4")){
+			}else if(syote.equals("3")){
 				ostoskori(istunto, lukija);
 				//istunto.tulostaOstoskori();
-
+				/*
 			}else if(syote.equals("5")){
 				istunto.tulostaHistoria();
 
 			}else if(syote.equals("6")){
 				istunto.tilaaTuotteet();
+				*/
 			}
-
+		
 		}
 		System.out.println("Kirjauduit ulos.");
 		
@@ -162,29 +162,35 @@ public class Kirjakauppa{
 
 	public static void ostoskori(Asiakasistunto istunto, Scanner lukija){
 
-		System.out.println("-------------");
-		System.out.println("| Ostoskori |");
-		System.out.println("-------------");
-		istunto.tulostaOstoskori();
+		
 
 		String syote = "";
 		
-		System.out.println("[ 1 ] Tilaa tuotteet");
-		System.out.println("[ 2 ] Tyhjennä ostoskori");
-		System.out.println("[ 3 ] Palaa päävalikkoon");
-		while(!(syote.equals("1") || syote.equals("2") || syote.equals("3"))){
+		
+
+		System.out.print("\n>");
+		while(!(syote.equals("3"))){
+			System.out.println("-------------");
+			System.out.println("| Ostoskori |");
+			System.out.println("-------------");
+			istunto.tulostaOstoskori();
+
+			System.out.println("[ 1 ] Tilaa tuotteet");
+			System.out.println("[ 2 ] Tyhjennä ostoskori");
+			System.out.println("[ 3 ] Palaa päävalikkoon");
+
 			syote=lukija.nextLine();
+
 			if(!(syote.equals("1") || syote.equals("2")|| syote.equals("3"))){
 				System.out.println("Tuntematon komento!");
 			}	
+			if(syote.equals("1")){
+				istunto.tilaaTuotteet();
+			}else if(syote.equals("2")){
+				istunto.tyhjennaKori();
+			}
 		}
-		if(syote.equals("1")){
-			istunto.tilaaTuotteet();
-		}else if(syote.equals("2")){
-			System.out.println("Tyhjätään");
-		}else if(syote.equals("3")){
-			
-		}
+		
 	
 	}
 
@@ -205,6 +211,8 @@ public class Kirjakauppa{
 			System.out.println("[ 1 ] Muokkaa tietoja");
 			System.out.println("[ 2 ] Lisää rahaa tilille");
 			System.out.println("[ 3 ] Palaa päävalikkoon");
+
+			System.out.print("\n>");
 
 			syote=lukija.nextLine();
 			if(!(syote.equals("1") || syote.equals("2")|| syote.equals("3"))){

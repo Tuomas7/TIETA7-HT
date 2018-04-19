@@ -318,11 +318,11 @@ public class Asiakasistunto{
 	// Metodi tuotteiden tilaamiselle
 	public void tilaaTuotteet(){
 
-		System.out.println("Ostoskorin sisältö:");
-		this.tulostaOstoskori();
+		//System.out.println("Ostoskorin sisältö:");
+		//this.tulostaOstoskori();
 
 		String vastaus = "";
-		System.out.println("Haluatko varmasti siirtyä tilauksen tekemiseen? (k/e)");
+		System.out.println("Haluatko varmasti siirtyä tilauksen tekemiseen? (k/e)\n>");
 
 		while(!(vastaus.equals("k") || vastaus.equals("e") || vastaus.equals("K")|| vastaus.equals("E"))){
 			vastaus = lukija.nextLine();
@@ -396,6 +396,23 @@ public class Asiakasistunto{
        	}
        	
          
+	}
+
+	public void tyhjennaKori(){
+		System.out.println("Haluatko varmasti tyhjentää ostoskorin? (k/e)\n>");
+		String vastaus = "";
+		while(!(vastaus.equals("k") || vastaus.equals("e") || vastaus.equals("K")|| vastaus.equals("E"))){
+			vastaus = lukija.nextLine();
+			if(vastaus.equals("k") || vastaus.equals("K")){
+				break;
+			}else if(vastaus.equals("e") || vastaus.equals("E")){
+				return;
+			}else{
+				System.out.println("Virheellinen komento!");
+			}
+		}
+		this.kyselyt.tyhjennaKori(this.ostoskori);
+
 	}
 
 	public void lisaaRahaa(){
