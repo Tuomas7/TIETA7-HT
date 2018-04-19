@@ -1,10 +1,24 @@
 
+// Asiakasistunto-luokka mallintaa kirjautuneen asiakkaan istuntoa.
+// Sisältää asiakkaan tiedot tallennettuna oliomuuttujiin, sekä Asiakaskyselyt-
+// olion, joka toimii rajapintana tietokantaan ja on vastuussa kaikista kyselyistä.
+// Asikaskyselyiden metodit palauttavat Hashmappeja teoshauista ja ostoskorin sisällöstä,
+// jotka tallennetaan myös istunnon oliomuuttujiin.
+
+
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Asiakasistunto{
 
+	// Attribuutit asiakasistunnolle
+	// kyselyt : Asiakaskysely-olio, joka muodostaa rajapinnan tietokantaan
+	// id: asiakkaan id
+	// nimi: Asiakkaan nimi
+	// asiakastiedot: asiakkaan tiedot tallennettuna HashMap-tietorakenteeseen
+	// hakuhistoria: Istunnon aikana hauissa käytetyt hakusanat arraylistissä
+	// saldo: miten paljon asiakkaalla on rahaa käytettävissä
 	private Asiakaskyselyt kyselyt;
 	private int id;
 	private String nimi;
@@ -12,7 +26,10 @@ public class Asiakasistunto{
 	private ArrayList<String> hakuhistoria;
 	private double saldo;
 
-	// Ostoskorista olio?
+	// ostoskori: Ostoskoriin lisätyt teokset Hashmapissa
+	// hakukriteeri: käytetään hyväksi teoshauissa
+	// hakusana: käytetään hyväksi teoshauissa
+	// teoshakutulokset: HashMap, joka sisältää teoshaun tulokset tietokannasta
 	private HashMap<String,ArrayList<String>> ostoskori;
 	private String hakukriteeri;
 	private String hakusana;
@@ -20,37 +37,41 @@ public class Asiakasistunto{
 	private Scanner lukija;
 	
 	
-
+	// Konstrukotri, joka saa parametrina id:n, joka asetetaan istunnon id:ksi
 	public Asiakasistunto(int id){
 
 		this.lukija = new Scanner(System.in);
 		this.id=id;
+		// Luodaan uusi kysely-olio ja asetetaan olion attribuutiksi sama id
+		// jolloin kyselyt tehdään automaattisesti asiakkaan omin tietoihin
+		// eikä id:tä tarvitse välittää parametrina
 		this.kyselyt = new Asiakaskyselyt();
 		this.kyselyt.asetaID(this.id);
+
+		// Haetaan kysely-oliolla asiakastiedot asiakastiedot - hashmappiin
 		this.asiakastiedot = this.kyselyt.haeKayttajanTiedot(this.id);
+
+		// Asetetaan asiakkaan nimi 
 		this.nimi = this.asiakastiedot.get("etunimi")+" "+this.asiakastiedot.get("sukunimi");
+		
 		// Tyhjä lista, merkkijonoille, joilla on tehty hakuja 
 		this.hakuhistoria = new ArrayList<>();
 
 		// Ajatus ostoskorista: luodaan kantaan attribuutti ostoskorin merkkijonolle, joka ladataan kun käyttäjä kirjautuu sisään?
 		this.ostoskori = new HashMap<String,ArrayList<String>>();
+
 		this.saldo = Double.parseDouble(this.asiakastiedot.get("saldo"));
 	}
 
-
+	// Getteri asiakkaan nimelle
 	public String haeNimi(){
 		return this.nimi;
 	}
 
-	public int haeID(){
-		return this.id;
-	}
-
-	public String haeOsoite(){
-		return this.asiakastiedot.get("osoite");
-	}
-
-	public String haePuhelin(){
+	// privaatti metodi joka palauttaa merkkijonoesityksen puhelinnumerosta
+	// Käytetään tulostaTiedot-metodissa. Palauttaa tyhjän merkkijonon, jos
+	// arvo on "NULL", muuten palauttaa puhelinnumeron.
+	private String haePuhelin(){
 		String puhelin = this.asiakastiedot.get("puhelin");
 		if(puhelin.equals("NULL")){
 			return "";
@@ -59,13 +80,27 @@ public class Asiakasistunto{
 		}
 	}
 
-	public String haeSahkoposti(){
+	// privaatti metodi joka palauttaa merkkijonoesityksen sähköpostiosoitteesta
+	// Käytetään tulostaTiedot-metodissa. Palauttaa tyhjän merkkijonon, jos
+	// arvo on "NULL", muuten palauttaa sähköpostiosoitteen.
+	private String haeSahkoposti(){
 		String sahkoposti = this.asiakastiedot.get("sahkoposti");
 		if(sahkoposti.equals("NULL")){
 			return "";
 		}else{
 			return sahkoposti;
 		}
+	}
+
+	// privaatti metodi joka palauttaa merkkijonoesityksen salasanan
+	// Käytetään tulostaTiedot-metodissa. Palauttaa salansanan pituisen
+	// merkkijonon tähtiä (tietoturva-aspekti).
+	private String haeSalasana(){
+		String maskattu = "";
+		for(int i = 0; i< this.asiakastiedot.get("salasana").length();i++){
+			maskattu = maskattu + "*";
+		}
+		return maskattu;
 	}
 
 	public ArrayList<String> haeHistoria(){
@@ -75,41 +110,32 @@ public class Asiakasistunto{
 	public HashMap<String,ArrayList<String>> haeOstoskori(){
 		return this.ostoskori;
 	}
+	
 
-	public double haeSaldo(){
-		return this.saldo;
-	}
-
-	public String haeTunnus(){
-		return this.asiakastiedot.get("nimi");
-	}
-
-	public String haeSalasana(){
-		String maskattu = "";
-		for(int i = 0; i< this.asiakastiedot.get("salasana").length();i++){
-			maskattu = maskattu + "*";
-		}
-		return maskattu;
-	}
-
-
+	// Tulostaa asiakkaan tiedot
 	public void tulostaTiedot(){
 		System.out.println("\nProfiilin tiedot:\n");
-		System.out.println("Nimi: "+this.haeNimi());
-		System.out.println("Osoite: "+this.haeOsoite());
+		System.out.println("Nimi: "+this.nimi);
+		System.out.println("Osoite: "+this.asiakastiedot.get("osoite"));
 		System.out.println("Puhelin: "+this.haePuhelin());
 		System.out.println("Sähköposti: "+this.haeSahkoposti());
-		System.out.println("Saldo: "+ this.haeSaldo());
-		System.out.println("\nKäyttäjätunnus: "+this.haeTunnus());
+		System.out.println("Saldo: "+ this.asiakastiedot.get("saldo"));
+		System.out.println("\nKäyttäjätunnus: "+this.asiakastiedot.get("tunnus"));
 		System.out.println("Salasana: "+this.haeSalasana());
 	}
 
+	// Metodi, joka tulostaa ostoskorin sisällön, eli tiedot teoksista, jotka on
+	// varattu käyttäjälle tällä hetkellä.
 	public void tulostaOstoskori(){
+
+		// Haetaan ostoskori-hahsmappiin tiedot varauksista käyttäen kysely-oliota.
 		this.ostoskori = this.kyselyt.haeVaraukset(this.id);
 		
 		if(this.ostoskori.size() == 0){
 			System.out.println("Ostoskori on tyhjä.");
+
 		}else{
+			// Tulostetaan muotoiltuna teosten nimet, tekijat, painot ja hinnat
 			System.out.println("\n--------------------------------------------------------------------------------");
 			System.out.format("%30s%30s%10s%10s\n","Nimi","Tekija","Paino","Hinta");
 			System.out.println("--------------------------------------------------------------------------------");
@@ -127,6 +153,8 @@ public class Asiakasistunto{
 		}
 	}
 
+	// Metodi tulostaa hakuhistorian, eli hakusanat joilla teoksia on haettu tämän
+	// istunnon aikana.
 	public void tulostaHistoria(){
 		if(this.hakuhistoria.size() == 0){
 			System.out.println("Hakuhistoria on tyhjä.\n");
@@ -136,15 +164,19 @@ public class Asiakasistunto{
 				System.out.println(haku);
 			}
 		}
-
 	}
 
+	// Metodi lisää hakuhistoriaan uuden hakusanan
 	public void lisaaHakuHistoriaan(String haku){
 		this.hakuhistoria.add(haku);
 	}
 
 	public void haeTeoksia(){
-		System.out.println("Kirjahaku");
+
+		System.out.println("------------");
+		System.out.println("| Teoshaku |");
+		System.out.println("------------");
+	
 		System.out.println("Valitse hakuehto:");
 		String hakusyote="";
 		while(!hakusyote.equals("6")){
@@ -283,7 +315,7 @@ public class Asiakasistunto{
 		//return true;
 	} 
 
-
+	// Metodi tuotteiden tilaamiselle
 	public void tilaaTuotteet(){
 
 		System.out.println("Ostoskorin sisältö:");
@@ -358,8 +390,32 @@ public class Asiakasistunto{
         	System.out.println("Virheellinen valinta. Syötä joko k tai e:");
         	valinta = this.lukija.next().charAt(0);
        	}
-       	this.kyselyt.teeTilaus(this.ostoskori);
+
+       	if(valinta=='k' || valinta == 'K'){
+       		this.kyselyt.teeTilaus(this.ostoskori);
+       	}
+       	
          
+	}
+
+	public void lisaaRahaa(){
+		System.out.println("-----------------------");
+		System.out.println("| Lisää tilille rahaa |");
+		System.out.println("-----------------------");
+
+		System.out.print("Kuinka paljon haluat siirtää käyttötilille?\n>");
+		try {
+			double siirto = Double.parseDouble(lukija.nextLine()); 
+			
+			this.kyselyt.siirraRahaa(this.saldo+siirto);
+			
+			// Päivitetään asiakastiedot
+			this.asiakastiedot = this.kyselyt.haeKayttajanTiedot(this.id);
+			
+		}catch (Exception e){
+			System.out.println("Siirto ei onnistunut\n");
+		}
+		
 	}
 
 

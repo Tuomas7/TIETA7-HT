@@ -121,6 +121,10 @@ public class Kirjakauppa{
 
 		String syote ="";
 		while(!syote.equals("7")){
+			System.out.println("--------------");
+			System.out.println("| Päävalikko |");
+			System.out.println("--------------");
+
 			System.out.println("Olet kirjautuneena käyttäjänä: "+istunto.haeNimi()+"\n");
 			System.out.println("[ 1 ] Hae teoksia");
 			System.out.println("[ 2 ] Profiili");
@@ -135,14 +139,14 @@ public class Kirjakauppa{
 			syote = lukija.nextLine();
 
 			if(syote.equals("1")){
-				System.out.println("Haetaan teoksia:");
 				istunto.haeTeoksia();
 
 			}else if(syote.equals("2")){
-				istunto.tulostaTiedot();
+				profiili(istunto, lukija);
 
 			}else if(syote.equals("4")){
-				istunto.tulostaOstoskori();
+				ostoskori(istunto, lukija);
+				//istunto.tulostaOstoskori();
 
 			}else if(syote.equals("5")){
 				istunto.tulostaHistoria();
@@ -156,7 +160,68 @@ public class Kirjakauppa{
 		
 	}
 
+	public static void ostoskori(Asiakasistunto istunto, Scanner lukija){
 
+		System.out.println("-------------");
+		System.out.println("| Ostoskori |");
+		System.out.println("-------------");
+		istunto.tulostaOstoskori();
+
+		String syote = "";
+		
+		System.out.println("[ 1 ] Tilaa tuotteet");
+		System.out.println("[ 2 ] Tyhjennä ostoskori");
+		System.out.println("[ 3 ] Palaa päävalikkoon");
+		while(!(syote.equals("1") || syote.equals("2") || syote.equals("3"))){
+			syote=lukija.nextLine();
+			if(!(syote.equals("1") || syote.equals("2")|| syote.equals("3"))){
+				System.out.println("Tuntematon komento!");
+			}	
+		}
+		if(syote.equals("1")){
+			istunto.tilaaTuotteet();
+		}else if(syote.equals("2")){
+			System.out.println("Tyhjätään");
+		}else if(syote.equals("3")){
+			
+		}
+	
+	}
+
+	public static void profiili(Asiakasistunto istunto, Scanner lukija){
+
+		
+		System.out.println();
+		String syote = "";
+		
+		
+
+		while(!(syote.equals("3"))){
+			System.out.println("------------");
+			System.out.println("| Profiili |");
+			System.out.println("------------");
+			istunto.tulostaTiedot();
+
+			System.out.println("[ 1 ] Muokkaa tietoja");
+			System.out.println("[ 2 ] Lisää rahaa tilille");
+			System.out.println("[ 3 ] Palaa päävalikkoon");
+
+			syote=lukija.nextLine();
+			if(!(syote.equals("1") || syote.equals("2")|| syote.equals("3"))){
+				System.out.println("Tuntematon komento!");
+			}	
+			if(syote.equals("1")){
+				//istunto.tilaaTuotteet();
+			}else if(syote.equals("2")){
+				istunto.lisaaRahaa();
+			}else if(syote.equals("3")){
+				
+			}
+
+		}
+		
+
+	}
 
 	
 

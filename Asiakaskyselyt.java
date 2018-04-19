@@ -38,6 +38,7 @@ public class Asiakaskyselyt{
 	private String tilausPeruutus;
 	private String myynti;
 	private String vapautus;
+	private String lisaaRahaa;
 
 
 	// Tietorakenteet, joihin tallennetaan kyselyiden tuloksia luokan sisällä ja joita luokan metodit palauttavat
@@ -54,6 +55,7 @@ public class Asiakaskyselyt{
 	private String input2;
 	private int paramInt;
 	private HashMap<String,String> mapInput;
+	private double inputDouble;
 
 
 	 
@@ -101,6 +103,8 @@ public class Asiakaskyselyt{
         // Asetetaan keskusdivarissa oleva kappale myydyksi/vapaaksi
         this.myynti = "UPDATE keskus.TeosKappale SET Vapaus='Myyty' WHERE KappaleID=?";
         this.vapautus = "UPDATE keskus.TeosKappale SET Vapaus='Vapaa' WHERE KappaleID=?";
+
+        this.lisaaRahaa = "UPDATE keskus.asiakas SET Saldo=? WHERE asiakasid =?";
 
 
 	}
@@ -214,6 +218,13 @@ public class Asiakaskyselyt{
 		this.yhteysHandleri();
 	}
 
+	public void siirraRahaa(double summa){
+
+		this.inputDouble = summa;
+		this.moodi="lisaarahaa";
+		this.yhteysHandleri();
+	}
+
 	// Yhteinen "yhteyshandleri" kyselyille, joka hoitaa yhteyksien avaamiset ja sulkemiset
 	// kyselyn tulokset tallennetaan oliomuuttujiin (HashMap, ArrayList, int)
 	private void yhteysHandleri(){
@@ -249,6 +260,8 @@ public class Asiakaskyselyt{
 
 			}else if(this.moodi.equals("teetilaus")){
 				this.tilauksenTeko();
+			}else if(this.moodi.equals("lisaarahaa")){
+				this.rahanLisays();
 			}
 	
 
@@ -294,9 +307,10 @@ public class Asiakaskyselyt{
 
 		// Lisätään tiedot HashMappiin
 		while(this.resultset.next()){
-			this.kyselyMap.put("nimi",this.resultset.getString("nimi"));
+			this.kyselyMap.put("tunnus",this.resultset.getString("nimi"));
 			this.kyselyMap.put("salasana",this.resultset.getString("salasana"));
 			this.kyselyMap.put("rooli",this.resultset.getString("rooli"));
+
 		}
 
 		// Haetaan myös tiedot asiakas-relaatiosta
@@ -626,6 +640,13 @@ public class Asiakaskyselyt{
 		}
 		this.connection.commit();
         this.connection.setAutoCommit(true); 
+	}
+
+	public void rahanLisays() throws SQLException{
+		this.preparedStatement = this.connection.prepareStatement(this.lisaaRahaa);
+		this.preparedStatement.setDouble(1,inputDouble);
+		this.preparedStatement.setInt(2,this.asiakasID);
+		this.preparedStatement.executeUpdate();
 	}
 
 }		
