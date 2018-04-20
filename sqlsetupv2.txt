@@ -1,0 +1,261 @@
+############################ skeemojen asetukset ja luonnit jos tarvis
+
+create schema keskus;
+SET search_path to keskus;
+SHOW SEARCH_PATH;
+
+
+
+############################ Keskus relaatioiden poisto, jos tarvii tehdä muutoksia rakenteeseen
+
+DROP table keskus.yllapitaja;
+DROP table keskus.sijainti;
+DROP table keskus.tilaus;
+DROP table keskus.teoskappale;
+DROP table keskus.teos;
+DROP table keskus.divari;
+DROP table keskus.asiakas;
+DROP table keskus.kayttaja;
+
+DROP table keskus.postikulut;
+DROP table keskus.toimitus;
+
+############################ D1 poisto
+DROP table D1.teoskappale;
+DROP table D1.teos;
+
+############################ Luo keskuksen relaatiot uudelleen 
+
+CREATE TABLE keskus.Divari (
+	DivariID int NOT NULL,
+	Nimi varchar(50) NOT NULL,
+	Osoite varchar(80),
+	Websivu varchar(50),
+	itsenainen int NOT NULL,
+	PRIMARY KEY (DivariID)
+
+);
+
+CREATE TABLE keskus.Kayttaja (
+	KayttajaID int NOT NULL,
+	Nimi varchar(50) NOT NULL,
+	Salasana varchar(50) NOT NULL,
+	Rooli varchar(20) DEFAULT 'Asiakas',
+	PRIMARY KEY (KayttajaID)
+);
+
+CREATE TABLE keskus.Yllapito (
+	KayttajaID int NOT NULL,
+	DivariID int NOT NULL,
+	PRIMARY KEY (KayttajaID, DivariID),
+	FOREIGN KEY (KayttajaID) REFERENCES keskus.Kayttaja(KayttajaID),
+	FOREIGN KEY (DivariID) REFERENCES keskus.Divari(DivariID)
+);
+
+CREATE TABLE keskus.Asiakas (
+	AsiakasID int NOT NULL,
+	Etunimi varchar(50) NOT NULL,
+	Sukunimi varchar(50) NOT NULL,
+	Osoite varchar(80) NOT NULL,
+	Sahkoposti varchar(50),
+	Puhelin varchar(15),
+	Saldo decimal(10,2) DEFAULT 0.00,
+	PRIMARY KEY (AsiakasID),
+	FOREIGN KEY (AsiakasID) REFERENCES keskus.Kayttaja(KayttajaID)
+);
+
+CREATE TABLE keskus.Teos (
+	ISBN varchar(13) NOT NULL,
+	Nimi varchar(50) NOT NULL,
+	Tekija varchar(50),
+	Vuosi int,
+	Tyyppi varchar(30),
+	Luokka varchar(30),
+	Paino int NOT NULL,
+	PRIMARY KEY (ISBN)
+);
+
+CREATE TABLE keskus.TeosKappale (
+	KappaleID int NOT NULL,
+	ISBN varchar(13) NOT NULL,
+	Hinta decimal(10,2) NOT NULL,
+	Ostohinta decimal(10,2) DEFAULT 0.00,
+	MyyntiPvm date,
+	Vapaus varchar(10) DEFAULT 'Vapaa',
+	PRIMARY KEY (KappaleID),
+	FOREIGN KEY (ISBN) REFERENCES keskus.Teos(ISBN)
+);
+
+CREATE TABLE keskus.Sijainti (
+	DivariID int NOT NULL,
+	KappaleID int NOT NULL,
+	PRIMARY KEY (DivariID, KappaleID),
+	FOREIGN KEY (DivariID) REFERENCES keskus.Divari(DivariID),
+	FOREIGN KEY (KappaleID) REFERENCES keskus.TeosKappale(KappaleID)
+);
+
+CREATE TABLE keskus.Tilaus (
+	TilausID int NOT NULL,
+	DivariID int NOT NULL,
+	AsiakasID int NOT NULL,
+	KappaleID int NOT NULL,
+	Tila varchar(10) DEFAULT 'Kaynnissa',
+	PRIMARY KEY (TilausID),
+	FOREIGN KEY (AsiakasID) REFERENCES keskus.Asiakas(AsiakasID),
+	FOREIGN KEY (DivariID) REFERENCES keskus.Divari(DivariID),
+	FOREIGN KEY (KappaleID) REFERENCES keskus.TeosKappale(KappaleID)
+);
+
+CREATE TABLE keskus.Postikulut (
+	Paino int NOT NULL,
+	Maksu decimal(10,2) NOT NULL,
+	PRIMARY KEY (Paino)
+);
+
+CREATE TABLE keskus.Toimitus (
+	TilausID int NOT NULL,
+	Paino int NOT NULL,
+	PRIMARY KEY (TilausID, Paino),
+	FOREIGN KEY (TilausID) REFERENCES keskus.Tilaus(TilausID),
+	FOREIGN KEY (Paino) REFERENCES keskus.Postikulut(Paino)
+);
+
+CREATE TABLE Yllapitaja (
+	YllapitajaID int NOT NULL,
+	DivariID int NOT NULL,
+
+	PRIMARY KEY (YllapitajaID,DivariID),
+	FOREIGN KEY (YllapitajaID) REFERENCES Kayttaja(KayttajaID),
+	FOREIGN KEY (DivariID) REFERENCES Divari(DivariID)
+);
+
+
+GRANT ALL PRIVILEGES ON table keskus.divari TO postgres;
+GRANT ALL PRIVILEGES ON table keskus.asiakas TO postgres;
+GRANT ALL PRIVILEGES ON table keskus.kayttaja TO postgres;
+GRANT ALL PRIVILEGES ON table keskus.teos TO postgres;
+GRANT ALL PRIVILEGES ON table keskus.teoskappale TO postgres;
+GRANT ALL PRIVILEGES ON table keskus.tilaus TO postgres;
+GRANT ALL PRIVILEGES ON table keskus.postikulut TO postgres;
+GRANT ALL PRIVILEGES ON table keskus.toimitus TO postgres;
+GRANT ALL PRIVILEGES ON table keskus.sijainti TO postgres;
+GRANT ALL PRIVILEGES ON table keskus.yllapitaja TO postgres;
+
+GRANT ALL PRIVILEGES ON SCHEMA keskus TO GROUP postgres;
+
+
+
+######################################## D1 
+create schema D1;
+
+CREATE TABLE D1.Teos (
+	ISBN varchar(13) NOT NULL,
+	Nimi varchar(50) NOT NULL,
+	Tekija varchar(50),
+	Vuosi int,
+	Tyyppi varchar(30),
+	Luokka varchar(30),
+	Paino int NOT NULL,
+	PRIMARY KEY (ISBN)
+);
+
+CREATE TABLE D1.TeosKappale (
+	KappaleID int NOT NULL,
+	ISBN varchar(13) NOT NULL,
+	Hinta decimal(10,2) NOT NULL,
+	Ostohinta decimal(10,2) DEFAULT 0.00,
+	MyyntiPvm date,
+	Vapaus varchar(10) DEFAULT 'Vapaa',
+	PRIMARY KEY (KappaleID),
+	FOREIGN KEY (ISBN) REFERENCES D1.Teos(ISBN)
+);
+
+
+GRANT ALL PRIVILEGES ON SCHEMA D1 TO GROUP postgres;
+GRANT ALL PRIVILEGES ON table D1.teos TO postgres;
+GRANT ALL PRIVILEGES ON table D1.teoskappale TO postgres;
+
+
+######################################### D3
+
+create schema D3;
+
+CREATE TABLE D3.Teos (
+	ISBN varchar(13) NOT NULL,
+	Nimi varchar(50) NOT NULL,
+	Tekija varchar(50),
+	Vuosi int,
+	Tyyppi varchar(30),
+	Luokka varchar(30),
+	Paino int NOT NULL,
+	PRIMARY KEY (ISBN)
+);
+
+CREATE TABLE D3.TeosKappale (
+	KappaleID int NOT NULL,
+	ISBN varchar(13) NOT NULL,
+	Hinta decimal(10,2) NOT NULL,
+	Ostohinta decimal(10,2) DEFAULT 0.00,
+	MyyntiPvm date,
+	Vapaus varchar(10) DEFAULT 'Vapaa',
+	PRIMARY KEY (KappaleID),
+	FOREIGN KEY (ISBN) REFERENCES D3.Teos(ISBN)
+);
+
+GRANT ALL PRIVILEGES ON table D3.teos TO postgres;
+GRANT ALL PRIVILEGES ON table D3.teoskappale TO postgres;
+
+GRANT ALL PRIVILEGES ON SCHEMA D3 TO GROUP postgres;
+
+
+
+########################################## keskusdivarin tietojen asetus
+
+
+
+INSERT INTO keskus.divari VALUES('1','Lassen Lehti','Lehtikatu 31, Tampere','www.lassenlehti.fi',1);
+INSERT INTO keskus.divari VALUES('2','Galleinn Galle','Kallenkuja 4, Vaasa','www.galleinngalle.fi',0);
+INSERT INTO keskus.divari VALUES('3','Antikvariaari Herätin','Triggerintie 58, Helsinki',null,1);
+INSERT INTO keskus.divari VALUES('4','Puolirakenteinen Kirjakauppa','Entiteetinpolku 19, Oulu',null,1);
+
+
+INSERT INTO keskus.teos VALUES('9155430674','Elektran tytär','Madeleine Brent','1986','romaani','romantiikka','1467');
+INSERT INTO keskus.teos VALUES('9156381451','Tuulentavoittelijan morsian','Madeleine Brent','1978','romaani','romantiikka','1356');
+INSERT INTO keskus.teos VALUES('1230207500','Turms kuolematon','Mika Waltari','1995','romaani','historia','964');
+INSERT INTO keskus.teos VALUES('9789510320990','Komisario Palmun erehdys','Mika Waltari','1940','romaani','dekkari','465');
+INSERT INTO keskus.teos VALUES('9519201785','Friikkilän pojat Mexicossa','Shelton Gilbert','1989','sarjakuva','huumori','198');
+INSERT INTO keskus.teos VALUES('9789510396230','Miten saan ystäviä, menestystä, vaikutusvaltaa','Dale Carnegien','1939','tietokirja','opas','736');
+
+
+
+
+
+INSERT INTO keskus.kayttaja VALUES(100,'admin1','admin1','Ylläpitäjä');
+INSERT INTO keskus.kayttaja VALUES(200,'admin2','admin2','Ylläpitäjä');
+INSERT INTO keskus.kayttaja VALUES(300,'admin3','admin3','Ylläpitäjä');
+INSERT INTO keskus.kayttaja VALUES(400,'admin4','admin4','Ylläpitäjä');
+INSERT INTO keskus.kayttaja VALUES(1, 'superuser', 'superuser', 'Superuser');
+
+INSERT INTO keskus.yllapitaja VALUES(100,1);
+INSERT INTO keskus.yllapitaja VALUES(200,2);
+INSERT INTO keskus.yllapitaja VALUES(300,3);
+INSERT INTO keskus.yllapitaja VALUES(400,4);
+
+
+############################## Relaatioiden tyhjennys testausta varten
+
+DELETE FROM keskus.yllapitaja;
+DELETE FROM keskus.sijainti;
+DELETE FROM keskus.tilaus;
+DELETE FROM keskus.postikulut
+DELETE FROM keskus.toimitus
+DELETE FROM keskus.teoskappale;
+DELETE FROM keskus.teos;
+DELETE FROM keskus.asiakas;
+DELETE FROM keskus.kayttaja;
+
+DELETE FROM D1.teoskappale;
+DELETE FROM D1.teos;
+
+
+#############################
