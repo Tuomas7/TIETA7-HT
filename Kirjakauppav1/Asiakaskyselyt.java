@@ -64,7 +64,7 @@ public class Asiakaskyselyt{
 	// Kontruktori, asetetaan prepared statementtien rungot
 	public Asiakaskyselyt(){
 		this.asiakasID = 0;
-		this.yhteys = new Yhteys("localhost", 5432, "bookstore", "testuser", "12345");
+		this.yhteys = new Yhteys("localhost", 5432, "bookstore", "postgres", "12345");
 		this.connection = null;
 		this.resultset = null;
 		this.preparedStatement = null;

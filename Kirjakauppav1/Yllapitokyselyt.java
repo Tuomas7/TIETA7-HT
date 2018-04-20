@@ -222,7 +222,8 @@ public class Yllapitokyselyt{
 
 		String maxkplid= "";
 		String lisaakpl="";
-		System.out.println(this.onkokannassa);
+		String lisaasijainti="";
+	
 		if(!this.onkokannassa){
 			maxkplid = "SELECT MAX(kappaleid) FROM D"+this.divariID+".teosKappale";
 			lisaakpl = "INSERT INTO D"+this.divariID+".TeosKappale VALUES (?, ?, ?, ?, null, 'Vapaa')";
@@ -230,6 +231,8 @@ public class Yllapitokyselyt{
 		}else{
 			maxkplid = "SELECT MAX(kappaleid) FROM keskus.teosKappale";
 			lisaakpl = "INSERT INTO keskus.TeosKappale VALUES (?, ?, ?, ?, null, 'Vapaa')";
+			lisaasijainti = "INSERT INTO keskus.Sijainti VALUES (?,?)";
+
 		}
 
 		// Haetaan suurin kappaleID tietokannassa ja lisätään siihen 1
@@ -240,13 +243,23 @@ public class Yllapitokyselyt{
         while(this.resultset.next()){
         	id = this.resultset.getInt(1) + 1;
         }
-       	System.out.println(id);
+   
         this.preparedStatement = this.connection.prepareStatement(lisaakpl);
         this.preparedStatement.setInt(1,id);
 		this.preparedStatement.setString(2,this.inputMap.get("isbn"));
 		this.preparedStatement.setDouble(3,Double.parseDouble(this.inputMap.get("hinta")));
 		this.preparedStatement.setDouble(4,Double.parseDouble(this.inputMap.get("ostohinta")));
 		this.preparedStatement.executeUpdate();
+
+		if(!lisaasijainti.equals("")){
+			System.out.println("juu");
+			this.preparedStatement = this.connection.prepareStatement(lisaasijainti);
+	        this.preparedStatement.setInt(1,this.divariID);
+			this.preparedStatement.setInt(2,id);
+			this.preparedStatement.executeUpdate();
+		}else{
+			System.out.println("ei");
+		}
 
 		this.connection.commit();
         this.connection.setAutoCommit(true);
@@ -260,6 +273,8 @@ public class Yllapitokyselyt{
 		String lisaateos="";
 		String maxkplid= "";
 		String lisaakpl="";
+		String lisaasijainti="";
+
 		if(!this.onkokannassa){
 			lisaateos = "INSERT INTO D"+this.divariID+".Teos VALUES (?,?,?,?,?,?,?)";
 			maxkplid = "SELECT MAX(kappaleid) FROM D"+this.divariID+".teosKappale";
@@ -269,6 +284,8 @@ public class Yllapitokyselyt{
 			lisaateos = "INSERT INTO keskus.Teos VALUES (?,?,?,?,?,?,?)";
 			maxkplid = "SELECT MAX(kappaleid) FROM keskus.teosKappale";
 			lisaakpl = "INSERT INTO keskus.TeosKappale VALUES (?, ?, ?, ?, null, 'Vapaa')";
+			lisaasijainti = "INSERT INTO keskus.Sijainti VALUES (?,?)";
+      
 		}
 		
 		this.preparedStatement = this.connection.prepareStatement(lisaateos);
@@ -299,6 +316,15 @@ public class Yllapitokyselyt{
 		this.preparedStatement.setDouble(4,Double.parseDouble(this.inputMap.get("ostohinta")));
 		this.preparedStatement.executeUpdate();
 
+		if(!lisaasijainti.equals("")){
+			System.out.println("juu");
+			this.preparedStatement = this.connection.prepareStatement(lisaasijainti);
+	        this.preparedStatement.setInt(1,this.divariID);
+			this.preparedStatement.setInt(2,id);
+			this.preparedStatement.executeUpdate();
+		}else{
+			System.out.println("ei");
+		}
 		this.connection.commit();
         this.connection.setAutoCommit(true);
 
