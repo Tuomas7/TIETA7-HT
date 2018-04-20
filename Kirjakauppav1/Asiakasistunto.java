@@ -302,7 +302,6 @@ public class Asiakasistunto{
 		String hakuid = lukija.nextLine();
 		
 		String id = this.teoshakutulokset.get(hakuid).get(0);
-		System.out.println(id);
 		//this.kyselyt.lisaaVaraus(Integer.parseInt(hakuid));
 		this.kyselyt.lisaaVaraus(Integer.parseInt(id));
 
@@ -321,81 +320,41 @@ public class Asiakasistunto{
 		//System.out.println("Ostoskorin sisältö:");
 		//this.tulostaOstoskori();
 
-		String vastaus = "";
-		System.out.println("Haluatko varmasti siirtyä tilauksen tekemiseen? (k/e)\n>");
-
-		while(!(vastaus.equals("k") || vastaus.equals("e") || vastaus.equals("K")|| vastaus.equals("E"))){
-			vastaus = lukija.nextLine();
-			if(vastaus.equals("k") || vastaus.equals("K")){
-				break;
-			}else if(vastaus.equals("e") || vastaus.equals("E")){
+	   System.out.println("Haluatko varmasti siirtyä tilauksen tekemiseen? (k/e)\n>");
+      String vastaus = lukija.nextLine();
+      
+      // Kysytään valintaa niin kauan, että asiakas syöttää k:n tai e:n
+		while(!(vastaus.equals("k") || vastaus.equals("K"))) {
+         
+			if(vastaus.equals("e") || vastaus.equals("E")){
 				return;
 			}else{
-				System.out.println("Virheellinen komento!");
+				System.out.println("Virheellinen komento! (k/e)\n>");
+            vastaus = lukija.nextLine();
 			}
 		}
 
-        // Kirjojen kokonaispaino
-        int kokoPaino = 0;
-            
-        System.out.println("Tilataan seuraavat kirjat:");
-        System.out.println();
-
-        // Tilauserien lukumäärä
-         int eraLkm = 1;
+      // Luodaan uusi toimitus (metodi myös kertoo käyttäjälle toimituskulut)
+      this.kyselyt.luoToimitus();
+      
+	   System.out.println("Vahvistetaanko tilaus? (k/e)\n>");
+      vastaus = lukija.nextLine();
+      
+      // Kysytään valintaa niin kauan, että asiakas syöttää k:n tai e:n
+		while(!(vastaus.equals("k") || vastaus.equals("K"))) {
          
-         // Lasketaan, moneenko erään tilaus täytyy jakaa (yksi erä on maksimissaan 2000 grammaa)
-         while (kokoPaino > 2000) {
-            eraLkm++;
-            kokoPaino -= 2000;
-         }
-         
-         if (eraLkm > 1) {
-            System.out.println();
-            System.out.println("Tilaus jaetaan painon vuoksi " + eraLkm + " erään.");
-         }
-         
-         // Postikulujen summa
-         float postikulut = 0;
-         
-         // Jokainen 2000 grammaa painava erä maksaa 14 euroa
-         postikulut += (eraLkm-1)*14.00;
-         
-         // Lasketaan yli menevän osan postikulut
-         if (kokoPaino <= 50) {
-            postikulut += 1.40;
-         }
-         else if (kokoPaino <= 100) {
-            postikulut += 2.10;
-         }
-         else if (kokoPaino <= 250) {
-            postikulut += 2.80;
-         }
-         else if (kokoPaino <= 500) {
-            postikulut += 5.60;
-         }
-         else if (kokoPaino <= 1000) {
-            postikulut += 8.40;
-         }
-         else {
-            postikulut += 14.00;
-         }
-         
-         System.out.println();
-         System.out.println("Tilauksen postikulut ovat " + postikulut + " euroa. Vahvistetaanko tilaus? (k/e)");
-
-        char valinta = this.lukija.next().charAt(0);
-        // Kysytään valintaa niin kauan, että asiakas syöttää k:n tai e:n
-        while (valinta != 'k' && valinta != 'K' && valinta != 'e' && valinta != 'E') {
-        	System.out.println("Virheellinen valinta. Syötä joko k tai e:");
-        	valinta = this.lukija.next().charAt(0);
-       	}
-
-       	if(valinta=='k' || valinta == 'K'){
-       		this.kyselyt.teeTilaus(this.ostoskori);
-       	}
-       	
-         
+			if(vastaus.equals("e") || vastaus.equals("E")){
+				return;
+			}else{
+				System.out.println("Virheellinen komento! (k/e)\n>");
+            vastaus = lukija.nextLine();
+			}
+		}
+      
+      System.out.println("Tilaus suoritettu onnistuneesti!");
+      
+      // Asetetaan tuotteet tilatuiksi ja tilaus suoritetuksi
+      this.kyselyt.teeTilaus(this.ostoskori);
 	}
 
 	public void tyhjennaKori(){

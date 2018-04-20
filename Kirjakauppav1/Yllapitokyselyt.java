@@ -45,7 +45,7 @@ public class Yllapitokyselyt{
 	public Yllapitokyselyt(int yllapitoID){
 		this.divariID = 0;
 		this.yllapitoID = yllapitoID;
-		this.yhteys = new Yhteys("localhost", 5432, "bookstore", "testuser", "12345");
+		this.yhteys = new Yhteys("localhost", 5432, "postgres", "postgres", "Salasana");
 		this.connection = null;
 		this.resultset = null;
 		this.preparedStatement = null;

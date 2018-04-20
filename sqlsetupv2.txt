@@ -99,29 +99,30 @@ CREATE TABLE keskus.Sijainti (
 );
 
 CREATE TABLE keskus.Tilaus (
-	TilausID int NOT NULL,
 	DivariID int NOT NULL,
 	AsiakasID int NOT NULL,
 	KappaleID int NOT NULL,
 	Tila varchar(10) DEFAULT 'Kaynnissa',
-	PRIMARY KEY (TilausID),
+	PRIMARY KEY (DivariID, AsiakasID, KappaleID),
 	FOREIGN KEY (AsiakasID) REFERENCES keskus.Asiakas(AsiakasID),
 	FOREIGN KEY (DivariID) REFERENCES keskus.Divari(DivariID),
 	FOREIGN KEY (KappaleID) REFERENCES keskus.TeosKappale(KappaleID)
 );
 
 CREATE TABLE keskus.Postikulut (
-	Paino int NOT NULL,
+	Maksuluokka int NOT NULL,
 	Maksu decimal(10,2) NOT NULL,
-	PRIMARY KEY (Paino)
+	PRIMARY KEY (Maksuluokka)
 );
 
 CREATE TABLE keskus.Toimitus (
-	TilausID int NOT NULL,
+   ToimitusID int NOT NULL,
+	AsiakasID int NOT NULL,
 	Paino int NOT NULL,
-	PRIMARY KEY (TilausID, Paino),
-	FOREIGN KEY (TilausID) REFERENCES keskus.Tilaus(TilausID),
-	FOREIGN KEY (Paino) REFERENCES keskus.Postikulut(Paino)
+   Maksuluokka int NOT NULL,
+	PRIMARY KEY (ToimitusID, AsiakasID),
+	FOREIGN KEY (AsiakasID) REFERENCES keskus.Asiakas(AsiakasID),
+	FOREIGN KEY (Maksuluokka) REFERENCES keskus.Postikulut(Maksuluokka)
 );
 
 

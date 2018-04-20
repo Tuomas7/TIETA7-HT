@@ -8,7 +8,6 @@ import java.util.Random;
 public class Kirjakauppa{
 
 
-
 	public static void main(String[] args){
 
 		Scanner lukija = new Scanner(System.in);
