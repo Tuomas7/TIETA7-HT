@@ -259,3 +259,15 @@ DELETE FROM D1.teos;
 
 
 #############################
+
+
+GRANT ALL PRIVILEGES ON table keskus.divari TO testuser;
+GRANT ALL PRIVILEGES ON table keskus.asiakas TO testuser;
+GRANT ALL PRIVILEGES ON table keskus.kayttaja TO testuser;
+GRANT ALL PRIVILEGES ON table keskus.teos TO testuser;
+GRANT ALL PRIVILEGES ON table keskus.teoskappale TO testuser;
+GRANT ALL PRIVILEGES ON table keskus.tilaus TO testuser;
+GRANT ALL PRIVILEGES ON table keskus.postikulut TO testuser;
+GRANT ALL PRIVILEGES ON table keskus.toimitus TO testuser;
+GRANT ALL PRIVILEGES ON table keskus.sijainti TO testuser;
+GRANT ALL PRIVILEGES ON table keskus.yllapitaja TO testuser;

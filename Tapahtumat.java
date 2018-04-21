@@ -221,6 +221,7 @@ public class Tapahtumat{
     * Rooli: Asiakas
     * Parametrit: yhteys, tilausta tekevän asiakkaan sessio
     */
+   /*
    public static void tilaaOstoskori(Connection yhteys, Sessio sessio) {
    
       try {
@@ -365,7 +366,7 @@ public class Tapahtumat{
          }
       }
    }
-   
+   */
    /* Tapahtuma 7
     * Kuvaus: Siirretään uusien teosten tiedot divarista D1 keskustietokantaan
     * Rooli: Divarin D1 ylläpitäjä
