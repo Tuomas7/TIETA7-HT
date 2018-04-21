@@ -6,9 +6,8 @@ import java.util.Arrays;
 import java.util.Random;
 
 public class Kirjakauppa{
-
-
-
+   
+   
 	public static void main(String[] args){
 
 		Scanner lukija = new Scanner(System.in);
@@ -62,7 +61,7 @@ public class Kirjakauppa{
 			
 			}else if(syote.equals("2")){
 				//System.out.print("\033[H\033[2J");
-				Kirjautumisavustaja avustaja = new Kirjautumisavustaja("Ylläpitäjä");
+				Kirjautumisavustaja avustaja = new Kirjautumisavustaja("Yllapitaja");
 				Yllapitajaistunto istunto = null;
 				istunto = avustaja.kirjauduyp();
 				
@@ -144,6 +143,7 @@ public class Kirjakauppa{
 			System.out.println("Olet kirjautuneena ylläpitäjänä:\n");
 			System.out.println("[ 1 ] Lisää teoksia");
 			System.out.println("[ 2 ] Näytä myynnissä olevat teokset");
+			System.out.println("[ 2 ] Päivitä keskustietokanta");
 			System.out.println("[ 3 ] Jotain muuta");
 			System.out.println("[ 4 ] Kirjaudu ulos");
 			System.out.print("\n> ");
@@ -155,7 +155,7 @@ public class Kirjakauppa{
 				istunto.lisaaTeos();
 				
 			}else if(syote.equals("2")){
-				//profiili(istunto, lukija);
+				istunto.paivitaKeskus();
 
 			}else if(syote.equals("3")){
 				//ostoskori(istunto, lukija);

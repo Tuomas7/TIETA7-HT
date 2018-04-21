@@ -383,16 +383,30 @@ public class Tapahtumat{
          // Siirretään kaikki teosten yleiset tiedot keskustietokantaan, jos niitä ei vielä ole siellä
          stmt.executeUpdate("INSERT INTO keskus.Teos SELECT * FROM D1.Teos ON CONFLICT DO NOTHING");
       
-         // Tehdään sama myös yksittäisten kappaleiden tiedoilla
-         stmt.executeUpdate("INSERT INTO keskus.TeosKappale SELECT * FROM D1.TeosKappale ON CONFLICT DO NOTHING");
+         // Haetaan seuraavaa vaihetta varten keskustietokannan suurin kappaleID
+         ResultSet rset = stmt.executeQuery("SELECT MAX(KappaleID) FROM keskus.teosKappale");
+         rset.next();
+         int id = rset.getInt(1);
       
-         // Haetaan kaikki kappaleIDt, joita ei löydy sijaintitaulusta
-         ResultSet rset = stmt.executeQuery("SELECT TeosKappale.KappaleID FROM keskus.TeosKappale "
-            + "NATURAL LEFT JOIN keskus.Sijainti WHERE Sijainti.KappaleID IS NULL");
-      
-         // Lisätään puuttuvat KappaleIDt sijaintitauluun
+         // Haetaan sellaisten teoskappaleiden tiedot, joita ei ole aikaisemmin päivitetty
+         rset = stmt.executeQuery("SELECT TeosKappale.KappaleID, TeosKappale.ISBN, TeosKappale.Hinta, "
+            + "TeosKappale.Ostohinta, TeosKappale.MyyntiPvm, TeosKappale.Vapaus FROM D1.TeosKappale WHERE NOT Paivitetty");
+         
+         // Käydään jokainen teoskappale läpi
          while (rset.next()) {
-            stmt.executeUpdate("INSERT INTO keskus.Sijainti VALUES ('1', '" + rset.getInt(1) + "')");
+            
+            // Kappaleen uusi ID
+            id++;
+            
+            // Lisätään kappale keskustietokantaan
+            stmt.executeUpdate("INSERT INTO keskus.TeosKappale VALUES ('" + id + "', '" + rset.getString(2) + "', '" 
+               + rset.getBigDecimal(3) + "', '" + rset.getBigDecimal(4) + "', '" + rset.getDate(5) + "', '" + rset.getString(6) + "')");
+            
+            // Lisätään kappaleen id myös sijaintitauluun
+            stmt.executeUpdate("INSERT INTO keskus.Sijainti VALUES ('1', '" + id + "')");
+            
+            // Päivitetään id alkuperäiseen kantaan ja asetetaan teoksen status päivitetyksi
+            stmt.executeUpdate("UPDATE D1.TeosKappale SET KappaleID='" + id + "', Paivitetty=true WHERE KappaleID=" + rset.getInt(1));
          }
       
          System.out.println("Tiedot päivitetty keskustietokantaan onnnistuneesti!");
@@ -490,6 +504,9 @@ public class Tapahtumat{
                // Lisätään niteen tiedot keskustietokantaan
                stmt.executeUpdate("INSERT INTO keskus.TeosKappale VALUES ('" + id + "', '" + isbn + "', '"
                   + hinta + "', null, null, 'Vapaa')");
+                  
+               // Lisätään myös niteen sijaintitiedot
+               stmt.executeUpdate("INSERT INTO keskus.Sijainti VALUES ('4', '" + id + "')");
             }
          }
 

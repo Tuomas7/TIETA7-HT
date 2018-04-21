@@ -81,6 +81,11 @@ public class Yllapitajaistunto{
 
 	}
 
+   // Päivitetään itsenäisen divarin tiedot keskustietokantaan
+	public void paivitaKeskus() {
+      this.kyselyt.paivitaKeskustietokanta();
+   }
+   
 	public void lisaaKappaletiedot(){
 
 		System.out.println("-----------------------");
@@ -130,8 +135,6 @@ public class Yllapitajaistunto{
 		System.out.println("");
 
 	}
-
-
 
 }
 /*
