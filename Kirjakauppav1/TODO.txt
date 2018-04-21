@@ -1,6 +1,4 @@
 ﻿- Raportit
 
-- T7: Lokaalin tietokannan päivitys keskustietokantaan (Tehty, täytyy vain siirtää ylläpitoluokkiin)
-
 - T8: lokaalin divarin tietojen siirto superuserina (Tehty, täytyy vain siirtää ylläpitoluokkiin)
 

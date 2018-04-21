@@ -233,10 +233,10 @@ INSERT INTO keskus.divari VALUES('2','Galleinn Galle','Kallenkuja 4, Vaasa','www
 INSERT INTO keskus.divari VALUES('3','Antikvariaari Herätin','Triggerintie 58, Helsinki',null,1);
 INSERT INTO keskus.divari VALUES('4','Puolirakenteinen Kirjakauppa','Entiteetinpolku 19, Oulu',null,1);
 
-INSERT INTO keskus.kayttaja VALUES(100,'admin1','admin1','Ylläpitäjä');
-INSERT INTO keskus.kayttaja VALUES(200,'admin2','admin2','Ylläpitäjä');
-INSERT INTO keskus.kayttaja VALUES(300,'admin3','admin3','Ylläpitäjä');
-INSERT INTO keskus.kayttaja VALUES(400,'admin4','admin4','Ylläpitäjä');
+INSERT INTO keskus.kayttaja VALUES(100,'admin1','admin1','Yllapitaja');
+INSERT INTO keskus.kayttaja VALUES(200,'admin2','admin2','Yllapitaja');
+INSERT INTO keskus.kayttaja VALUES(300,'admin3','admin3','Yllapitaja');
+INSERT INTO keskus.kayttaja VALUES(400,'admin4','admin4','Yllapitaja');
 INSERT INTO keskus.kayttaja VALUES(1, 'superuser', 'superuser', 'Superuser');
 
 INSERT INTO keskus.yllapitaja VALUES(100,1);

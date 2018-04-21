@@ -192,7 +192,7 @@ public class Kirjautumisavustaja{
 			System.out.print("Puhelin:\n> ");
 			String puhelin = lukija.nextLine();
 			if(puhelin.length()>0){
-				tiedot.put("puhelin",sahkoposti);
+				tiedot.put("puhelin",puhelin);
 			}else{
 				tiedot.put("puhelin","NULL");
 			}
