@@ -1,4 +1,4 @@
-
+import java.util.Scanner;
 
 public class Superuser{
 
@@ -8,6 +8,7 @@ public class Superuser{
 
 	public Superuser(int id){
 		this.id = id;
+		private Scanner lukija;
 	}
 
 

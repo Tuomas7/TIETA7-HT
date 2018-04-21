@@ -16,6 +16,7 @@ public class Kirjakauppa{
 		boolean kirjautuminen = false;
 		
 		Asiakaskyselyt kysely = new Asiakaskyselyt();
+		Yllapitokyselyt kyselyt = new Yllapitokyselyt();
 
 		// "Clear screen"
 		System.out.print("\033[H\033[2J");
@@ -116,7 +117,7 @@ public class Kirjakauppa{
 			System.out.println("| Superuser |");
 			System.out.println("-------------");
 			System.out.println("Olet kirjautuneena keskustietokannan pääkäyttäjänä:\n");
-			System.out.println("[ 1 ] Lisää teoksia");
+			System.out.println("[ 1 ] Lisää paikallisen tietokannan tiedot keskustietokantaan");
 			System.out.println("[ 2 ] Jotain muuta");
 			System.out.println("[ 3 ] Jotain muuta");
 			System.out.println("[ 4 ] Kirjaudu ulos");
@@ -142,7 +143,7 @@ public class Kirjakauppa{
 			System.out.println("------------");
 			System.out.println("Olet kirjautuneena ylläpitäjänä:\n");
 			System.out.println("[ 1 ] Lisää teoksia");
-			System.out.println("[ 2 ] Jotain muuta");
+			System.out.println("[ 2 ] Näytä myynnissä olevat teokset");
 			System.out.println("[ 3 ] Jotain muuta");
 			System.out.println("[ 4 ] Kirjaudu ulos");
 			System.out.print("\n> ");

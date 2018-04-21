@@ -15,6 +15,7 @@ public class Yllapitajaistunto{
 
 
 	public Yllapitajaistunto(int id){
+		System.out.println("dfds");
 		this.kayttajaID = id;
 		this.lukija = new Scanner(System.in);
 		//System.out.println(this.kayttajaID);
