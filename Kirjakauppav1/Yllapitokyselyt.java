@@ -3,17 +3,7 @@ import java.util.Random;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.io.IOException;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+
 
 	
 public class Yllapitokyselyt{
@@ -40,14 +30,15 @@ public class Yllapitokyselyt{
 	private String onkoDivariKannassa;
 	private String haeISBNlocal;
 	private String haeISBNkeskus;
-   private String maxID;
-   private String paivitaKappale;
-   private String paivitaSijainti;
+   	private String maxID;
+   	private String paivitaKappale;
+   	private String paivitaSijainti;
 
 	public Yllapitokyselyt(int yllapitoID){
+
 		this.divariID = 0;
 		this.yllapitoID = yllapitoID;
-		this.yhteys = new Yhteys("localhost", 5432, "postgres", "postgres", "salasana");
+		this.yhteys = new Yhteys("localhost", 5432, "bookstore", "testuser", "12345");
 		this.connection = null;
 		this.resultset = null;
 		this.preparedStatement = null;
@@ -60,8 +51,8 @@ public class Yllapitokyselyt{
 		this.haeISBNkeskus = "SELECT isbn FROM keskus.teos";
       
 		this.maxID = "SELECT MAX(kappaleid) FROM keskus.teosKappale";
-      this.paivitaKappale = "INSERT INTO keskus.TeosKappale VALUES (?, ?, ?, ?, ?, ?)";
-      this.paivitaSijainti = "INSERT INTO keskus.Sijainti VALUES (?, ?)";
+      	this.paivitaKappale = "INSERT INTO keskus.TeosKappale VALUES (?, ?, ?, ?, ?, ?)";
+     	 this.paivitaSijainti = "INSERT INTO keskus.Sijainti VALUES (?, ?)";
 	}
 
 	public int haeDivari(){

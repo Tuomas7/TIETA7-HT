@@ -15,7 +15,10 @@ public class Kirjakauppa{
 		boolean kirjautuminen = false;
 		
 		Asiakaskyselyt kysely = new Asiakaskyselyt();
-		Yllapitokyselyt kyselyt = new Yllapitokyselyt();
+		// Dummyt
+		Yllapitokyselyt kys = new Yllapitokyselyt(0);
+		SuperuserKyselyt kys2 = new SuperuserKyselyt();
+		//Yllapitokyselyt kyselyt = new Yllapitokyselyt(0);
 
 		// "Clear screen"
 		System.out.print("\033[H\033[2J");
@@ -61,7 +64,7 @@ public class Kirjakauppa{
 			
 			}else if(syote.equals("2")){
 				//System.out.print("\033[H\033[2J");
-				Kirjautumisavustaja avustaja = new Kirjautumisavustaja("Yllapitaja");
+				Kirjautumisavustaja avustaja = new Kirjautumisavustaja("Ylläpitäjä");
 				Yllapitajaistunto istunto = null;
 				istunto = avustaja.kirjauduyp();
 				
@@ -117,12 +120,18 @@ public class Kirjakauppa{
 			System.out.println("-------------");
 			System.out.println("Olet kirjautuneena keskustietokannan pääkäyttäjänä:\n");
 			System.out.println("[ 1 ] Lisää paikallisen tietokannan tiedot keskustietokantaan");
-			System.out.println("[ 2 ] Jotain muuta");
+			System.out.println("[ 2 ] Tulosta myyntiraportti");
 			System.out.println("[ 3 ] Jotain muuta");
 			System.out.println("[ 4 ] Kirjaudu ulos");
 			System.out.print("\n> ");
 
 			syote = lukija.nextLine();
+
+			if(syote.equals("1")){
+				istunto.myyntiRaportti();
+			}else if(syote.equals("2")){
+				istunto.lisaaDivariKantaan();
+			}
 		}
 	}
 

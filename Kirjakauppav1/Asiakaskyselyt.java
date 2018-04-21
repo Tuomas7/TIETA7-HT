@@ -69,7 +69,7 @@ public class Asiakaskyselyt{
 	// Kontruktori, asetetaan prepared statementtien rungot
 	public Asiakaskyselyt(){
 		this.asiakasID = 0;
-		this.yhteys = new Yhteys("localhost", 5432, "postgres", "postgres", "salasana");
+		this.yhteys = new Yhteys("localhost", 5432, "bookstore", "testuser", "12345");
 		this.connection = null;
 		this.resultset = null;
 		this.preparedStatement = null;
@@ -96,14 +96,14 @@ public class Asiakaskyselyt{
 		this.haeDivariID = "SELECT DivariID FROM keskus.sijainti WHERE KappaleID=?";
 		
 		this.lisaaVaraus = "INSERT INTO keskus.tilaus VALUES (?, ?, ?, ?)";
-      this.haeVaraukset = "SELECT kappaleid, DivariID, isbn, hinta, nimi, tekija, vuosi, tyyppi, luokka, paino FROM keskus.tilaus NATURAL JOIN keskus.teoskappale NATURAL JOIN keskus.teos WHERE asiakasid = ? AND tila = 'Kaynnissa'";
+       	this.haeVaraukset = "SELECT kappaleid, DivariID, isbn, hinta, nimi, tekija, vuosi, tyyppi, luokka, paino FROM keskus.tilaus NATURAL JOIN keskus.teoskappale NATURAL JOIN keskus.teos WHERE asiakasid = ? AND tila = 'Kaynnissa'";
 
-      this.lisaaToimitus = "INSERT INTO keskus.toimitus VALUES (?, ?, ?, ?)";
-      this.poistaToimitus = "DELETE FROM keskus.toimitus WHERE AsiakasID=?";
-      this.laskePostikulut = "SELECT SUM(Maksu) FROM keskus.Toimitus NATURAL JOIN keskus.Postikulut WHERE AsiakasID=?";
+      	this.lisaaToimitus = "INSERT INTO keskus.toimitus VALUES (?, ?, ?, ?)";
+      	this.poistaToimitus = "DELETE FROM keskus.toimitus WHERE AsiakasID=?";
+      	this.laskePostikulut = "SELECT SUM(Maksu) FROM keskus.Toimitus NATURAL JOIN keskus.Postikulut WHERE AsiakasID=?";
 
-      this.haeSuurinMaksuluokka = "SELECT MAX(Maksuluokka) FROM keskus.Postikulut";
-      this.haeOikeaMaksuluokka = "SELECT MIN(Maksuluokka) FROM keskus.Postikulut WHERE Maksuluokka >= ?";
+      	this.haeSuurinMaksuluokka = "SELECT MAX(Maksuluokka) FROM keskus.Postikulut";
+      	this.haeOikeaMaksuluokka = "SELECT MIN(Maksuluokka) FROM keskus.Postikulut WHERE Maksuluokka >= ?";
       
 		// Tilaus statement
 		//his.tilaaTuotteet = "SELECT Teos.Nimi, Teos.Paino, TeosKappale.KappaleID FROM keskus.Tilaus NATURAL JOIN keskus.TeosKappale NATURAL JOIN keskus.Teos WHERE Tilaus.Tila='Kaynnissa' AND Tilaus.AsiakasID=?";
@@ -299,9 +299,9 @@ public class Asiakaskyselyt{
 				this.tilauksenPeruutus();
 			}
 	
-         // Sitoudutaan muutoksiin
-         this.connection.commit();
-         this.connection.setAutoCommit(true);
+	       	// Sitoudutaan muutoksiin
+	       	this.connection.commit();
+	       	this.connection.setAutoCommit(true);
 
 		} catch(SQLException poikkeus) {
          
@@ -509,59 +509,65 @@ public class Asiakaskyselyt{
 		this.preparedStatement = this.connection.prepareStatement(this.haeDivariID);
 		this.preparedStatement.setInt(1,this.paramInt);
 		this.resultset = this.preparedStatement.executeQuery();
-      this.resultset.next();
-      
-      int divariID = this.resultset.getInt("DivariID");
+        System.out.println(this.paramInt);
+        //this.resultset.next();
+      	// Tämä herjas mulla
+      	//int divariID = this.resultset.getInt("DivariID");
+      	int divariID = 0;
+		while(this.resultset.next()){
+			divariID = this.resultset.getInt("DivariID");
+
+		}
       
 		// Jos divari ei kuulu keskustietokantaan, asetetaan kappale varatuksi myös siellä
 		if (divariID != 2 && divariID != 4) {
 			this.yksittainendivariVaraus = "UPDATE D"+divariID+".TeosKappale SET Vapaus='Varattu' WHERE KappaleID=?";
-         this.preparedStatement = this.connection.prepareStatement(this.yksittainendivariVaraus);
-         this.preparedStatement.setInt(1,this.paramInt);
+         	this.preparedStatement = this.connection.prepareStatement(this.yksittainendivariVaraus);
+         	this.preparedStatement.setInt(1,this.paramInt);
 			this.preparedStatement.executeUpdate();
       }
       
-      // Luodaan uusi käynnissä oleva tilaus (vastaa kappaleen siirtämistä "ostoskoriin")
-      this.preparedStatement = this.connection.prepareStatement(this.lisaaVaraus);
-      this.preparedStatement.setInt(1,divariID);
-      this.preparedStatement.setInt(2,this.asiakasID);
-      this.preparedStatement.setInt(3,this.paramInt);
-      this.preparedStatement.setString(4,"Kaynnissa");
-      this.preparedStatement.executeUpdate();
+      	// Luodaan uusi käynnissä oleva tilaus (vastaa kappaleen siirtämistä "ostoskoriin")
+      	this.preparedStatement = this.connection.prepareStatement(this.lisaaVaraus);
+      	this.preparedStatement.setInt(1,divariID);
+      	this.preparedStatement.setInt(2,this.asiakasID);
+      	this.preparedStatement.setInt(3,this.paramInt);
+      	this.preparedStatement.setString(4,"Kaynnissa");
+      	this.preparedStatement.executeUpdate();
 	}
 
    // Luodaan uusi toimitus asiakkaan ostoskorissa olevista kappaleista
 	public void toimituksenLuonti() throws SQLException{
    
-      // Aloitetaan puhtaalta pöydältä poistamalla mahdolliset vanhat toimitustiedot
+      	// Aloitetaan puhtaalta pöydältä poistamalla mahdolliset vanhat toimitustiedot
 		this.preparedStatement = this.connection.prepareStatement(this.poistaToimitus);
 		this.preparedStatement.setInt(1,this.asiakasID);
 		this.preparedStatement.executeUpdate();
    
-      // Haetaan suurin maksuluokka (sama kuin täyteen pakatun toimituspaketin paino grammoina)
+      	// Haetaan suurin maksuluokka (sama kuin täyteen pakatun toimituspaketin paino grammoina)
 		this.preparedStatement = this.connection.prepareStatement(this.haeSuurinMaksuluokka);
 		this.resultset = this.preparedStatement.executeQuery();
-      this.resultset.next();
+      	this.resultset.next();
       
-      int maksuLuokka = this.resultset.getInt(1);
+      	int maksuLuokka = this.resultset.getInt(1);
       
-      // Haetaan asiakkaan tekemät varaukset
+      	// Haetaan asiakkaan tekemät varaukset
 		this.preparedStatement = this.connection.prepareStatement(this.haeVaraukset);
 		this.preparedStatement.setInt(1,this.asiakasID);
 		this.resultset = this.preparedStatement.executeQuery();
       
-      int toimitusLkm = 1;
-      int toimitusPaino = 0;
+      	int toimitusLkm = 1;
+      	int toimitusPaino = 0;
       
-      // Jaetaan varaus erillisiin toimituksiin painon perusteella
-      while(this.resultset.next()){
+      	// Jaetaan varaus erillisiin toimituksiin painon perusteella
+      	while(this.resultset.next()){
          
-         int kappalePaino = this.resultset.getInt("paino");
+        	int kappalePaino = this.resultset.getInt("paino");
          
-         // Toimituspakettiin ei mahdu enää yhtäkään kirjaa
-         if ((toimitusPaino + kappalePaino) > maksuLuokka) {
+        // Toimituspakettiin ei mahdu enää yhtäkään kirjaa
+        if ((toimitusPaino + kappalePaino) > maksuLuokka) {
 
-            // Lisätään uusi toimitus tietokantaan
+        	// Lisätään uusi toimitus tietokantaan
             this.preparedStatement = this.connection.prepareStatement(this.lisaaToimitus);
             this.preparedStatement.setInt(1,toimitusLkm);
             this.preparedStatement.setInt(2,this.asiakasID);
@@ -571,34 +577,34 @@ public class Asiakaskyselyt{
             
             toimitusLkm++;
             toimitusPaino = 0;
-         }
+        }
          
-         toimitusPaino += kappalePaino;
+        toimitusPaino += kappalePaino;
       }
       
-      // Haetaan jäljelle jääneen toimituksen painoa vastaava maksuluokka tietokannasta
+      	// Haetaan jäljelle jääneen toimituksen painoa vastaava maksuluokka tietokannasta
 		this.preparedStatement = this.connection.prepareStatement(this.haeOikeaMaksuluokka);
-      this.preparedStatement.setInt(1,toimitusPaino);
+      	this.preparedStatement.setInt(1,toimitusPaino);
 		this.resultset = this.preparedStatement.executeQuery();
-      this.resultset.next();
+     	this.resultset.next();
 
-      maksuLuokka = this.resultset.getInt(1);
+      	maksuLuokka = this.resultset.getInt(1);
       
-      // Lisätään viimeinenkin toimitus tietokantaan
-      this.preparedStatement = this.connection.prepareStatement(this.lisaaToimitus);
-      this.preparedStatement.setInt(1,toimitusLkm);
-      this.preparedStatement.setInt(2,this.asiakasID);
-      this.preparedStatement.setInt(3,toimitusPaino);
-      this.preparedStatement.setInt(4,maksuLuokka);
-      this.preparedStatement.executeUpdate();
+      	// Lisätään viimeinenkin toimitus tietokantaan
+      	this.preparedStatement = this.connection.prepareStatement(this.lisaaToimitus);
+      	this.preparedStatement.setInt(1,toimitusLkm);
+      	this.preparedStatement.setInt(2,this.asiakasID);
+      	this.preparedStatement.setInt(3,toimitusPaino);
+      	this.preparedStatement.setInt(4,maksuLuokka);
+      	this.preparedStatement.executeUpdate();
       
-      // Ilmoitetaan lopuksi käyttäjälle toimitusten lukumäärä ja postikulut
+      	// Ilmoitetaan lopuksi käyttäjälle toimitusten lukumäärä ja postikulut
 		this.preparedStatement = this.connection.prepareStatement(this.laskePostikulut);
-      this.preparedStatement.setInt(1,asiakasID);
+      	this.preparedStatement.setInt(1,asiakasID);
 		this.resultset = this.preparedStatement.executeQuery();
-      this.resultset.next();
+      	this.resultset.next();
       
-      System.out.println("Tilaus toimitetaan " + toimitusLkm + " erässä. Postikulut ovat yhteensä " + this.resultset.getInt(1) + " rahaa.");
+      	System.out.println("Tilaus toimitetaan " + toimitusLkm + " erässä. Postikulut ovat yhteensä " + this.resultset.getInt(1) + " rahaa.");
    }
    
 	public void varauksienHaku() throws SQLException{
