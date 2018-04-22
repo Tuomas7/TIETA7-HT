@@ -16,7 +16,8 @@ import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
+import java.util.HashMap;
+import java.util.ArrayList;
 
 
 
@@ -29,6 +30,7 @@ public class SuperuserKyselyt{
 	private String moodi;
 	private PreparedStatement preparedStatement;
 	private Scanner lukija;
+	private HashMap<String,ArrayList<String>> kyselyTulos;
 
 	private String lisaaTeos;
 	private String haeMaxID;
@@ -42,6 +44,7 @@ public class SuperuserKyselyt{
 		this.resultset = null;
 		this.preparedStatement = null;
 		this.lukija = new Scanner(System.in);
+		
 
 		this.lisaaTeos = "INSERT INTO keskus.Teos VALUES (?,?,?, null, null, null,?)";
 		this.haeMaxID = "SELECT MAX(KappaleID) FROM keskus.teosKappale";
@@ -186,14 +189,120 @@ public class SuperuserKyselyt{
 
 		
 
-	public void tulostaRaportti(){
+
+	public HashMap<String,ArrayList<String>> tulostaRaportti(){
 
 		this.moodi = "raportti";
-		//this.yhteysHandleri();
+		this.yhteysHandleri();
+		return this.kyselyTulos;
+
 	}
 
+	public HashMap<String,ArrayList<String>> luokkaTiedot(){
+		this.moodi = "luokkatiedot";
+		this.yhteysHandleri();
+		return this.kyselyTulos;
+	}
 
+	// Yhteinen "yhteyshandleri" kyselyille, joka hoitaa yhteyksien avaamiset ja sulkemiset
+	// kyselyn tulokset tallennetaan oliomuuttujiin (HashMap, ArrayList, int)
+	private void yhteysHandleri(){
 
+		
+		try {
+         
+			this.connection = this.yhteys.uusiYhteys();
+			this.connection.setAutoCommit(false);
+			
+			// tässä kohtaa kutsutaan privaattia kyselyfunktiota
+			if(this.moodi.equals("raportti")){
+				this.myyntiRaportti();
+            
+			}else if(this.moodi.equals("luokkatiedot")){
+				this.teosLuokat();
+			}
+	
+         // Sitoudutaan muutoksiin
+         this.connection.commit();
+         this.connection.setAutoCommit(true);
+
+		} catch(SQLException poikkeus) {
+         
+        	System.out.println("Tapahtui seuraava virhe: " + poikkeus.getMessage());  
+
+        	try {
+            
+	         // Perutaan tapahtuma
+	         this.connection.rollback();
+            
+         } catch (SQLException poikkeus2) {
+            System.out.println("Tapahtuman peruutus epäonnistui: " + poikkeus2.getMessage()); 
+         }
+         
+      } finally {
+         
+         try {
+            
+            // Vapautetaan resurssit
+    		   if (this.resultset != null) {
+            	this.resultset.close();
+    		   }
+    		   if (this.preparedStatement != null) {
+            	this.preparedStatement.close();
+    		   }
+    		   if (this.connection != null) {
+            	this.connection.close();
+    		   }
+         } catch (SQLException poikkeus) {
+            System.out.println("Tapahtui seuraava virhe: " + poikkeus.getMessage());
+         }
+		}
+	}
+
+	public void teosLuokat() throws SQLException{
+		this.kyselyTulos = new HashMap<String, ArrayList<String>>();
+		String teosLuokittelu = "SELECT * FROM keskus.hinnatluokittain";
+		this.preparedStatement=this.connection.prepareStatement(teosLuokittelu);
+		this.resultset = this.preparedStatement.executeQuery();
+
+		int i = 0;
+
+		while(this.resultset.next()){
+			ArrayList<String> tiedot = new ArrayList<String>();
+			String luokka = this.resultset.getString("luokka");
+			double kokonaishinta = this.resultset.getDouble("kokonaishinta");
+			double keskihinta  = this.resultset.getDouble("keskihinta");
+
+			tiedot.add(luokka);
+			tiedot.add(String.valueOf(kokonaishinta));
+			tiedot.add(String.valueOf(keskihinta));
+
+			this.kyselyTulos.put(String.valueOf(i),tiedot);
+			i = i+1;
+		}
+	}
+
+	public void myyntiRaportti() throws SQLException{
+		this.kyselyTulos = new HashMap<String, ArrayList<String>>();
+		String myyntiRaportti = "SELECT * FROM keskus.ostotVuodessa";
+		this.preparedStatement=this.connection.prepareStatement(myyntiRaportti);
+		this.resultset = this.preparedStatement.executeQuery();
+
+		int i = 0;
+		while(this.resultset.next()){
+			ArrayList<String> tiedot = new ArrayList<String>();
+			String etunimi = this.resultset.getString("etunimi");
+			String sukunimi = this.resultset.getString("sukunimi");
+			int hinta  = this.resultset.getInt("ostot");
+
+			tiedot.add(etunimi);
+			tiedot.add(sukunimi);
+			tiedot.add(String.valueOf(hinta));
+
+			this.kyselyTulos.put(String.valueOf(i),tiedot);
+			i = i+1;
+		}
+	}
 	
 	
 

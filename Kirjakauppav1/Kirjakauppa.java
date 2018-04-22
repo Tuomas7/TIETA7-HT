@@ -120,17 +120,19 @@ public class Kirjakauppa{
 			System.out.println("-------------");
 			System.out.println("Olet kirjautuneena keskustietokannan pääkäyttäjänä:\n");
 			System.out.println("[ 1 ] Lisää paikallisen tietokannan tiedot keskustietokantaan");
-			System.out.println("[ 2 ] Tulosta myyntiraportti");
-			System.out.println("[ 3 ] Jotain muuta");
+			System.out.println("[ 2 ] Tulosta teosten luokkien kokonaismyyntihinnat ja keskihinnat");
+			System.out.println("[ 3 ] Tulosta myyntiraportti");
 			System.out.println("[ 4 ] Kirjaudu ulos");
 			System.out.print("\n> ");
 
 			syote = lukija.nextLine();
 
 			if(syote.equals("1")){
-				istunto.myyntiRaportti();
-			}else if(syote.equals("2")){
 				istunto.lisaaDivariKantaan();
+			}else if(syote.equals("2")){
+				istunto.luokkaRaportti();
+			}else if(syote.equals("3")){
+				istunto.myyntiRaportti();
 			}
 		}
 	}
