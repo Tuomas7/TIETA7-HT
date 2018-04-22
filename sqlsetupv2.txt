@@ -367,6 +367,7 @@ GRANT ALL PRIVILEGES ON table keskus.postikulut TO testuser;
 GRANT ALL PRIVILEGES ON table keskus.toimitus TO testuser;
 GRANT ALL PRIVILEGES ON table keskus.sijainti TO testuser;
 GRANT ALL PRIVILEGES ON table keskus.yllapitaja TO testuser;
+GRANT ALL PRIVILEGES ON table keskus.postikulut TO testuser;
 =======
 ##########################################
 
