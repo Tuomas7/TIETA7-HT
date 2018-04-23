@@ -264,17 +264,24 @@ public class Asiakasistunto{
 		for(String hakusana : hakusanat.split(" ")){
     		this.monisanahaku.add(hakusana);
 		}
+		
 
-		String query = "SELECT nimi FROM keskus.teos WHERE nimi like '%"+this.monisanahaku.get(0)+"%'";
+		String query = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE nimi like '%"+this.monisanahaku.get(0)+"%'";
 		for(int i = 1; i<this.monisanahaku.size();i++){
-			query = query + " UNION ALL SELECT nimi FROM keskus.teos WHERE nimi like '%"+this.monisanahaku.get(i)+"%'";
+			query = query + " UNION ALL SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE nimi like '%"+this.monisanahaku.get(i)+"%'";
 			
 		}
-		String fullquery = "SELECT nimi, COUNT(nimi) FROM ("+query+") AS yy GROUP BY nimi ORDER BY COUNT(nimi) DESC";
+		String fullquery = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta FROM ("+query+") AS comb GROUP BY nimi,isbn,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta ORDER BY COUNT(nimi) DESC,nimi DESC";
 
 		System.out.println(fullquery);
 
 		this.teoshakutulokset = kyselyt.haeUseallaHakusanalla(fullquery);
+
+		if(this.teoshakutulokset.size() == 0){
+			System.out.println("Mitään ei löytynyt!\n");
+		}else{
+			this.tulostaHaku();
+		}
 		
 		
 

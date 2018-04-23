@@ -495,12 +495,32 @@ public class Asiakaskyselyt{
 	}
 
 	public void haeUseillaSanoilla() throws SQLException{
+		this.teoskysely = new HashMap<String,ArrayList<String>>();
+		
 		this.preparedStatement = this.connection.prepareStatement(this.input1);
 		System.out.println("metodista");
 		this.resultset = this.preparedStatement.executeQuery();
 
+		int kyselynumero = 1;
 		while(this.resultset.next()){
-			System.out.println(this.resultset.getString("nimi"));
+			String indeksi = String.valueOf(kyselynumero);
+			// Lisätään teoksen kaikki tiedot merkkijonoina ArrayListiin
+			ArrayList<String> teostiedot = new ArrayList<>();
+
+			teostiedot.add(this.resultset.getString("kappaleid"));
+			teostiedot.add(this.resultset.getString("isbn"));
+			teostiedot.add(this.resultset.getString("nimi"));
+			teostiedot.add(this.resultset.getString("tekija"));
+			teostiedot.add(this.resultset.getString("vuosi"));
+			teostiedot.add(this.resultset.getString("tyyppi"));
+			teostiedot.add(this.resultset.getString("luokka"));
+			teostiedot.add(this.resultset.getString("paino"));
+			teostiedot.add(this.resultset.getString("hinta"));
+			
+			
+			// Lisätään tiedot HashMappiin, avaimena kyselynumero, arvona arraylist
+			this.teoskysely.put(indeksi,teostiedot);
+			kyselynumero = kyselynumero +1;
 		}
 	}
 
