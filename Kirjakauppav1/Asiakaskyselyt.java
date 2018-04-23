@@ -209,13 +209,20 @@ public class Asiakaskyselyt{
 
 	}
 
+	public HashMap<String,ArrayList<String>> haeUseallaHakusanalla(String kysely){
+		this.input1 = kysely;
+		this.moodi = "haemonisana";
+		this.yhteysHandleri();
+		return this.teoskysely;
+	}
+
 	public HashMap<String,ArrayList<String>> haeVaraukset(int id){
 
 		this.teoskysely = new HashMap<String,ArrayList<String>>();
 		this.asiakasID = asiakasID;
 		this.moodi = "haevaraukset";
 		this.yhteysHandleri();
-		return teoskysely;
+		return this.teoskysely;
 	}
 
 	public void lisaaVaraus(int ID){
@@ -297,6 +304,9 @@ public class Asiakaskyselyt{
 
 			}else if(this.moodi.equals("perutilaus")){
 				this.tilauksenPeruutus();
+
+			}else if(this.moodi.equals("haemonisana")){
+				this.haeUseillaSanoilla();
 			}
 	
 	       	// Sitoudutaan muutoksiin
@@ -482,6 +492,16 @@ public class Asiakaskyselyt{
 			
 		}
 
+	}
+
+	public void haeUseillaSanoilla() throws SQLException{
+		this.preparedStatement = this.connection.prepareStatement(this.input1);
+		System.out.println("metodista");
+		this.resultset = this.preparedStatement.executeQuery();
+
+		while(this.resultset.next()){
+			System.out.println(this.resultset.getString("nimi"));
+		}
 	}
 
 	public void tunnusVarattu() throws SQLException{

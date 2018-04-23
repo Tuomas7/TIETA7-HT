@@ -24,6 +24,7 @@ public class Asiakasistunto{
 	private String nimi;
 	private HashMap<String,String> asiakastiedot;
 	private ArrayList<String> hakuhistoria;
+	private ArrayList<String> monisanahaku;
 	private double saldo;
 
 	// ostoskori: Ostoskoriin lisätyt teokset Hashmapissa
@@ -179,14 +180,15 @@ public class Asiakasistunto{
 	
 		System.out.println("Valitse hakuehto:");
 		String hakusyote="";
-		while(!hakusyote.equals("6")){
+		while(!hakusyote.equals("7")){
 
 			System.out.println("[ 1 ] Hae nimen perusteella");
 			System.out.println("[ 2 ] Hae tekijän perusteella");
 			System.out.println("[ 3 ] Hae luokan perusteella");
 			System.out.println("[ 4 ] Hae tyypin perusteella");
 			System.out.println("[ 5 ] Hae kaikkien tietojen perusteella");
-			System.out.println("[ 6 ] Takaisin päävalikkoon");
+			System.out.println("[ 6 ] Hae nimen perusteella (useita haksusanoja)");
+			System.out.println("[ 7 ] Takaisin päävalikkoon");
 
 			System.out.print("\n> ");
 			hakusyote = this.lukija.nextLine();
@@ -211,7 +213,11 @@ public class Asiakasistunto{
 				this.hakukriteeri = "kaikki";
 				this.haekirjoja();
 
-			}else if(!hakusyote.equals("6")){
+			}else if(hakusyote.equals("6")){
+				this.hakukriteeri = "monisana";
+				this.haeKirjojaMulti();
+
+			}else if(!hakusyote.equals("7")){
 				System.out.println("Tuntematon komento!");
 			}
 			
@@ -246,6 +252,33 @@ public class Asiakasistunto{
 			this.tulostaHaku();
 		}
 		
+	}
+
+	public void haeKirjojaMulti(){
+		String hakusanat = "";
+		System.out.println("Syötä hakusanat välilyönnillä erotettuna:");
+		hakusanat = lukija.nextLine();
+		
+
+		this.monisanahaku = new ArrayList<String>();
+		for(String hakusana : hakusanat.split(" ")){
+    		this.monisanahaku.add(hakusana);
+		}
+
+		String query = "SELECT nimi FROM keskus.teos WHERE nimi like '%"+this.monisanahaku.get(0)+"%'";
+		for(int i = 1; i<this.monisanahaku.size();i++){
+			query = query + " UNION ALL SELECT nimi FROM keskus.teos WHERE nimi like '%"+this.monisanahaku.get(i)+"%'";
+			
+		}
+		String fullquery = "SELECT nimi, COUNT(nimi) FROM ("+query+") AS yy GROUP BY nimi ORDER BY COUNT(nimi) DESC";
+
+		System.out.println(fullquery);
+
+		this.teoshakutulokset = kyselyt.haeUseallaHakusanalla(fullquery);
+		
+		
+
+
 	}
 
 	public void tulostaHaku(){
