@@ -1,3 +1,5 @@
+// kirjautumisavustaja-luokka. Käytetään käyttäjän sisäänkirjautumisessa.
+
 import java.util.Scanner;
 import java.util.HashMap;
 import java.io.Console;
@@ -134,6 +136,7 @@ public class Kirjautumisavustaja{
 		// Talllennetaan syötettävät tiedot hashmappiin
 		HashMap<String,String> tiedot = new HashMap<String,String>();
 
+		// Syötetään asiakkaan tiedot
 		while(true){
 
 			String rooli ="Asiakas";
@@ -207,7 +210,7 @@ public class Kirjautumisavustaja{
 				System.out.println("Puhelin: "+puhelin+"\n");
 			}
 			
-			
+			// Varmistetaan että tiedot oikein
 			String varmistus = "";
 			while(!(varmistus.equals("E") || varmistus.equals("K"))){
 				System.out.print("Tarkista tiedot. Jos tiedot ovat oikein, jatketaan tunnuksen luomiseen. (K/E)\n\n> ");
@@ -278,20 +281,19 @@ public class Kirjautumisavustaja{
 				}
 			}
 
-			// Tähän lisäys kantaan.
+			// Tietojen päivitys tietokantaan
 			if(this.kysely.lisaaKayttaja(tiedot)){
 				System.out.println("Tunnus luotu onnistuneesti!");
 				System.out.println("Voit nyt kirjautua sisään.");
 				return true;
 			}
 			
-			return false;
-			
-			
+			return false;			
 		}
 		
 	}
 
+	// Metodi tarkistaa, ettei syötetä tyhjiä arvoja
 	public boolean tarkastaPituus(String tieto){
 		if(tieto.length()>0){
 			return true;
@@ -301,6 +303,7 @@ public class Kirjautumisavustaja{
 
 	}
 
+	// Metodi tarkistaa täsmäävätkö syötetyt salasanat
 	public boolean salasanaTarkistus(String pw1, String pw2){
 		
 		if(pw1.length()>6 && pw2.length()>6 && pw1.equals(pw2)){
@@ -308,13 +311,4 @@ public class Kirjautumisavustaja{
 		}
 		return false;
 	}
-
-
-
-
-
-
-
-
-
 }

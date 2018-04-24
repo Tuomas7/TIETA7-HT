@@ -1,3 +1,5 @@
+// Yllapitokyselyt-luokka. Tietokantarajapinta ylläpitäjälle.
+
 import java.sql.*;
 import java.util.Random;
 import java.util.HashMap;
@@ -45,6 +47,7 @@ public class Yllapitokyselyt{
 
 		this.onkokannassa = false;
 
+		// prepared statementit;
 		this.haeDivariID = "SELECT divariid FROM keskus.yllapitaja WHERE yllapitajaid =?";
 		this.onkoDivariKannassa = "SELECT itsenainen FROM keskus.divari WHERE divariid = ?";
 
@@ -55,6 +58,7 @@ public class Yllapitokyselyt{
      	 this.paivitaSijainti = "INSERT INTO keskus.Sijainti VALUES (?, ?)";
 	}
 
+	// hae divarin id
 	public int haeDivari(){
 
 		this.moodi = "haedivari";
@@ -63,6 +67,7 @@ public class Yllapitokyselyt{
 
 	}
 
+	// Tarkastetaan onko divari keskustietokannassa
 	public boolean tarkastaDivari(){
 		
 		this.moodi = "onkokannassa";
@@ -70,6 +75,7 @@ public class Yllapitokyselyt{
 		return this.onkokannassa;
 	}
 
+	// haetaan teoksen isbn paikkallisesta divarista
 	public boolean haeISBNpaikallinen(String isbn){
 		this.inputData = isbn;
 	
@@ -78,6 +84,7 @@ public class Yllapitokyselyt{
 		return this.onkokannassa;
 	}
 
+	// haetaan teoksen isbn keskusdivarista
 	public boolean haeISBNkeskus(String isbn){
 		this.inputData = isbn;
 
@@ -86,18 +93,21 @@ public class Yllapitokyselyt{
 		return this.onkokannassa;
 	}
 
+	// kappaleen tietojen lisäys
 	public void lisaaKPLtiedot(HashMap<String,String> tiedot){
 		this.inputMap = tiedot;
 		this.moodi = "lisaakpl";
 		this.yhteysHandleri();
 	}
 
+	// teoksen tietojen + kappaletietojen lisäys
 	public void lisaateosKPLtiedot(HashMap<String,String> tiedot){
 		this.inputMap = tiedot;
 		this.moodi = "lisaateoskpl";
 		this.yhteysHandleri();
 	}
-   
+   	
+   	// keskustietokannan päivitys
 	public void paivitaKeskustietokanta(){
 		this.moodi = "keskusPaivitys";
 		this.yhteysHandleri();
@@ -173,7 +183,7 @@ public class Yllapitokyselyt{
 		}
 	}
 
-
+	// Divari-id:n asetus kyselyoliolle
 	public void asetaDivariID() throws SQLException{
 		this.preparedStatement = this.connection.prepareStatement(this.haeDivariID);
 		this.preparedStatement.setInt(1,this.yllapitoID);
@@ -202,6 +212,7 @@ public class Yllapitokyselyt{
 		}
 	}
 
+	// haetaan teoksen isbn paikkallisesta divarista
 	public void haeISBNpaikallisesta() throws SQLException{
 		this.onkokannassa = false;
 		this.haeISBNlocal = "SELECT isbn FROM D"+this.divariID+".teos";
@@ -216,6 +227,7 @@ public class Yllapitokyselyt{
 		}
 	}
 
+	// haetaan teoksen isbn keskusdivarista
 	public void haeISBNkeskuksesta() throws SQLException{
 		this.onkokannassa = false;
 		this.preparedStatement = this.connection.prepareStatement(this.haeISBNkeskus);
@@ -229,6 +241,7 @@ public class Yllapitokyselyt{
 		}
 	}
 
+	// kappaleen lisäys
 	public void lisaaKappale() throws SQLException{
 		this.haeDivaria();
 
@@ -274,6 +287,7 @@ public class Yllapitokyselyt{
 		}
 	}
 
+	// teostietojen ja kappaletietojen lisäys
 	public void lisaaTeosKappale() throws SQLException{
 
 		this.haeDivaria();
@@ -336,6 +350,7 @@ public class Yllapitokyselyt{
 
 	}
 
+	// keskustietokannan päivitys
 	public void paivitaKeskus() throws SQLException{
       
       // Haetaan käyttäjän hallinnoiman divarin ID muuttujaan

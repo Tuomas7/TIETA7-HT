@@ -9,7 +9,6 @@
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Scanner;
-
 public class Asiakasistunto{
 
 	// Attribuutit asiakasistunnolle
@@ -172,6 +171,10 @@ public class Asiakasistunto{
 		this.hakuhistoria.add(haku);
 	}
 
+	// Metodi, joka palauttaa tulostuksen teoskappaleista, joihin hakusana 
+	// sisältyy. Haku voidaan kohdistaa nimeen, tekijään, luokkaan, tyyppiin
+	// tai kaikkiin em. kenttiin kerralla. Lisäksi voidaan hakea useammalla
+	// hakusanalla.
 	public void haeTeoksia(){
 
 		System.out.println("------------");
@@ -225,6 +228,7 @@ public class Asiakasistunto{
 		
 	}
 
+	// Apumetodi teoskappaleiden haulle.
 	public void haekirjoja(){
 		
 		String hakusana="";
@@ -237,10 +241,12 @@ public class Asiakasistunto{
 
 		hakusana = this.lukija.nextLine();
 
+		// Lisätään hakusana hakuhistoriaan
 		if(hakusana.length()>0){
 			this.lisaaHakuHistoriaan(hakusana);
 		}
 
+		// haetaan hakutulokset hashmappii
 		if(this.hakukriteeri.equals("nimi") || this.hakukriteeri.equals("tekija") || this.hakukriteeri.equals("luokka") || this.hakukriteeri.equals("tyyppi") || this.hakukriteeri.equals("kaikki")){
 			this.teoshakutulokset = kyselyt.haeTeoksia(this.hakukriteeri, hakusana);
 
@@ -254,43 +260,44 @@ public class Asiakasistunto{
 		
 	}
 
+	// Metodi, jossa teoskappaleita hetaan usemmalla hakusanalla
 	public void haeKirjojaMulti(){
 		String hakusanat = "";
 		System.out.println("Syötä hakusanat välilyönnillä erotettuna:");
 		hakusanat = lukija.nextLine();
 		
-
+		// Hakusanat arraylistiin
 		this.monisanahaku = new ArrayList<String>();
 		for(String hakusana : hakusanat.split(" ")){
     		this.monisanahaku.add(hakusana);
 		}
 		
-
+		// Luodaan arraylistin hakusanoista query string
 		String query = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE nimi like '%"+this.monisanahaku.get(0)+"%'";
 		for(int i = 1; i<this.monisanahaku.size();i++){
 			query = query + " UNION ALL SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta FROM keskus.teos NATURAL JOIN keskus.teoskappale WHERE nimi like '%"+this.monisanahaku.get(i)+"%'";
 			
 		}
+		// Viimeistelty query string
 		String fullquery = "SELECT isbn,nimi,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta FROM ("+query+") AS comb GROUP BY nimi,isbn,tekija,vuosi,tyyppi,luokka,paino,kappaleid,hinta ORDER BY COUNT(nimi) DESC,nimi DESC";
 
-		System.out.println(fullquery);
-
+		// Haetaan teokset Hashmappiin
 		this.teoshakutulokset = kyselyt.haeUseallaHakusanalla(fullquery);
 
+
+		// Tulostetaan hakutulokset
 		if(this.teoshakutulokset.size() == 0){
 			System.out.println("Mitään ei löytynyt!\n");
 		}else{
 			this.tulostaHaku();
 		}
 		
-		
-
-
 	}
 
+	// Metodi, joka vastaa hakutulosten tulostuksesta
 	public void tulostaHaku(){
 		System.out.println("\n-------------------------------------------------------------------------------------------------------------------------------------------------");
-      	System.out.format("%5s%15s%30s%30s%15s%15s%15s%10s%10s\n","","ISBN","Nimi","Tekija","Vuosi","Tyyppi","Luokka","Paino","Hinta");
+      	System.out.format("%5s%15s%50s%30s%15s%15s%15s%10s%10s\n","","ISBN","Nimi","Tekija","Vuosi","Tyyppi","Luokka","Paino","Hinta");
       	System.out.println("-------------------------------------------------------------------------------------------------------------------------------------------------");
 
       	for(int i = 1 ; i< this.teoshakutulokset.size()+1; i++){
@@ -298,19 +305,17 @@ public class Asiakasistunto{
       		//System.out.println(haut.get(avain));
       		System.out.format("%5s",avain);
       		for(int j = 1 ; j<this.teoshakutulokset.get(avain).size();j++){
-      			if(j==2 || j==3){
+      			if(j==2){
+      				System.out.format("%50s",this.teoshakutulokset.get(avain).get(j));
+      			}else if(j==3){
       				System.out.format("%30s",this.teoshakutulokset.get(avain).get(j));
       			}else if(j==7 || j==8){
       				System.out.format("%10s",this.teoshakutulokset.get(avain).get(j));
       			}else{
       				System.out.format("%15s",this.teoshakutulokset.get(avain).get(j));
-      			}
-      			
-
+      			}	
       		}
       		System.out.println();
-
-      		
       	}
       	System.out.println("\n");
 
@@ -335,35 +340,32 @@ public class Asiakasistunto{
 
 	}
 
+
+	// Metodi, joka lisää teoksen ostoskoriin
 	public boolean lisaaKoriin(){
 
 
 		System.out.print("Syötä hakutuloksessa näkyvä rivin ensimmäinen numero:\n> ");
 		String hakuid = lukija.nextLine();
 		
+		// Haetaan teoskappaleen id
 		String id = this.teoshakutulokset.get(hakuid).get(0);
-		//this.kyselyt.lisaaVaraus(Integer.parseInt(hakuid));
+		
+		// Tehdään muutokset tietokantaan
 		this.kyselyt.lisaaVaraus(Integer.parseInt(id));
-
 
 		return true;
 
-		
-		//System.out.println(this.teoshakutulokset.get(hakuid));
-		//this.ostoskori.put(hakuid,this.teoshakutulokset.get(hakuid));
-		//return true;
 	} 
 
 	// Metodi tuotteiden tilaamiselle
 	public void tilaaTuotteet(){
 
-		//System.out.println("Ostoskorin sisältö:");
-		//this.tulostaOstoskori();
-
-	   System.out.println("Haluatko varmasti siirtyä tilauksen tekemiseen? (k/e)\n>");
-      String vastaus = lukija.nextLine();
+	
+	  	System.out.println("Haluatko varmasti siirtyä tilauksen tekemiseen? (k/e)\n>");
+      	String vastaus = lukija.nextLine();
       
-      // Kysytään valintaa niin kauan, että asiakas syöttää k:n tai e:n
+      	// Kysytään valintaa niin kauan, että asiakas syöttää k:n tai e:n
 		while(!(vastaus.equals("k") || vastaus.equals("K"))) {
          
 			if(vastaus.equals("e") || vastaus.equals("E")){
@@ -374,13 +376,13 @@ public class Asiakasistunto{
 			}
 		}
 
-      // Luodaan uusi toimitus (metodi myös kertoo käyttäjälle toimituskulut)
-      this.kyselyt.luoToimitus();
+      	// Luodaan uusi toimitus (metodi myös kertoo käyttäjälle toimituskulut)
+      	this.kyselyt.luoToimitus();
       
-	   System.out.println("Vahvistetaanko tilaus? (k/e)\n>");
-      vastaus = lukija.nextLine();
+	   	System.out.println("Vahvistetaanko tilaus? (k/e)\n>");
+      	vastaus = lukija.nextLine();
       
-      // Kysytään valintaa niin kauan, että asiakas syöttää k:n tai e:n
+      	// Kysytään valintaa niin kauan, että asiakas syöttää k:n tai e:n
 		while(!(vastaus.equals("k") || vastaus.equals("K"))) {
          
 			if(vastaus.equals("e") || vastaus.equals("E")){
@@ -397,23 +399,31 @@ public class Asiakasistunto{
       this.kyselyt.teeTilaus(this.ostoskori);
 	}
 
+	// Metodi ostoskorin tyhjennykselle
 	public void tyhjennaKori(){
+
 		System.out.println("Haluatko varmasti tyhjentää ostoskorin? (k/e)\n>");
 		String vastaus = "";
+
 		while(!(vastaus.equals("k") || vastaus.equals("e") || vastaus.equals("K")|| vastaus.equals("E"))){
 			vastaus = lukija.nextLine();
+
 			if(vastaus.equals("k") || vastaus.equals("K")){
 				break;
+
 			}else if(vastaus.equals("e") || vastaus.equals("E")){
 				return;
+
 			}else{
 				System.out.println("Virheellinen komento!");
 			}
 		}
+		// Suoritetaan muutokset tietokantatasolla
 		this.kyselyt.tyhjennaKori(this.ostoskori);
 
 	}
 
+	// Metodi rahan lisäämiselle tilille
 	public void lisaaRahaa(){
 		System.out.println("-----------------------");
 		System.out.println("| Lisää tilille rahaa |");
@@ -423,6 +433,7 @@ public class Asiakasistunto{
 		try {
 			double siirto = Double.parseDouble(lukija.nextLine()); 
 			
+			// Tehdään muutokset tietokantaan
 			this.kyselyt.siirraRahaa(this.saldo+siirto);
 			
 			// Päivitetään asiakastiedot
@@ -430,11 +441,6 @@ public class Asiakasistunto{
 			
 		}catch (Exception e){
 			System.out.println("Siirto ei onnistunut\n");
-		}
-		
-	}
-
-
-
-	
+		}	
+	}	
 }

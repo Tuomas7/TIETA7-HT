@@ -1,3 +1,5 @@
+// ylläpitäjäistunto-luokka. Mallintaa Ylläpitäjän istuntoa ja metodeita.
+
 import java.util.Scanner;
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -34,6 +36,7 @@ public class Yllapitajaistunto{
 		return this.divariKeskusKannassa;
 	}
 
+	// Teoksen tietojen lisääminen tietokantaan
 	public void lisaaTeos(){
 		
 		this.lisays = new HashMap<String,String>();
@@ -83,9 +86,10 @@ public class Yllapitajaistunto{
 
    // Päivitetään itsenäisen divarin tiedot keskustietokantaan
 	public void paivitaKeskus() {
-      this.kyselyt.paivitaKeskustietokanta();
-   }
-   
+      	this.kyselyt.paivitaKeskustietokanta();
+   	}
+   	
+   	// Lisätään uuden kappaleen tiedot tietokantaan
 	public void lisaaKappaletiedot(){
 
 		System.out.println("-----------------------");
@@ -104,6 +108,7 @@ public class Yllapitajaistunto{
 		System.out.println("");
 	}
 
+	// Lisätään uuden teoksen tiedot ja kappaletiedot tietokantaan
 	public void lisaaTeostiedot(){
 
 		System.out.println("Teostietoja ei löytynyt tietokannasta. Lisätään teostiedot ja kappaletiedot.");
@@ -137,52 +142,3 @@ public class Yllapitajaistunto{
 	}
 
 }
-/*
- 
-   
-     
-   
-      try {
-
-         yhteys.setAutoCommit(false);
-      
-         // Luodaan tapahtumaolio
-         Statement stmt = yhteys.createStatement();
-      
-         // Lisätään teoksen tiedot
-         stmt.executeUpdate("INSERT INTO D1.Teos VALUES ('" + isbn + "', '" + nimi + "', '"
-            + tekija + "', '" + vuosi + "', '" + tyyppi + "', '" + luokka + "', '" + paino + "')");
-      
-         // Haetaan suurin kappaleID tietokannassa ja lisätään siihen 1
-         ResultSet rset = stmt.executeQuery("SELECT MAX(KappaleID) FROM D1.teosKappale");
-         rset.next();
-         int id = rset.getInt(1) + 1;
-      
-         // Lisätään yksittäisen kappaleen tiedot
-         stmt.executeUpdate("INSERT INTO D1.TeosKappale VALUES ('" + id + "', '" + isbn + "', '"
-            + hinta + "', '" + ostohinta + "', null, 'Vapaa')");
-      
-         System.out.println("Tiedot lisätty onnnistuneesti!");
-         
-         // Sitoudutaan muutoksiin
-         yhteys.commit();
-         yhteys.setAutoCommit(true);
-         
-         // Suljetaan tapahtumaolio
-         stmt.close();
-         
-      } catch (SQLException poikkeus) {
-         
-         System.out.println("Tietojen lisäys epäonnistui: " + poikkeus.getMessage());  
-         
-         try {
-            
-            // Perutaan tapahtuma
-            yhteys.rollback();
-            
-         } catch (SQLException poikkeus2) {
-            System.out.println("Tapahtuman peruutus epäonnistui: " + poikkeus2.getMessage()); 
-         }
-      }
-	}
-*/

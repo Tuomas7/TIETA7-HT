@@ -1,3 +1,5 @@
+// Asiakaskyselyt -luokka. Tietokantarajapinta asiakkalle.
+
 import java.sql.*;
 import java.util.Random;
 import java.util.HashMap;
@@ -175,6 +177,7 @@ public class Asiakaskyselyt{
 		
 	}
 
+	// käyttäjän lisäys
 	public boolean lisaaKayttaja(HashMap<String,String> kayttajatiedot){
 		
 		this.kyselybool = false;
@@ -198,6 +201,7 @@ public class Asiakaskyselyt{
 
 	}
 
+	// teosten haku
 	public HashMap<String,ArrayList<String>> haeTeoksia(String hakuehto, String hakusana){
 		this.input1 = hakuehto;
 		this.input2 = hakusana;
@@ -209,6 +213,7 @@ public class Asiakaskyselyt{
 
 	}
 
+	// haku usealla hakusanalla
 	public HashMap<String,ArrayList<String>> haeUseallaHakusanalla(String kysely){
 		this.input1 = kysely;
 		this.moodi = "haemonisana";
@@ -216,6 +221,7 @@ public class Asiakaskyselyt{
 		return this.teoskysely;
 	}
 
+	// varausten haku
 	public HashMap<String,ArrayList<String>> haeVaraukset(int id){
 
 		this.teoskysely = new HashMap<String,ArrayList<String>>();
@@ -225,6 +231,7 @@ public class Asiakaskyselyt{
 		return this.teoskysely;
 	}
 
+	//varauksen lisäys
 	public void lisaaVaraus(int ID){
 		this.paramInt = ID;
 		//this.asiakasID = asiakasID;
@@ -233,17 +240,20 @@ public class Asiakaskyselyt{
 		
 	}
 
+	//toimituksen luonti
    public void luoToimitus() {
       this.moodi = "luotoimitus";
       this.yhteysHandleri();
    }
-   
+   	
+   	//tilauken teko
 	public void teeTilaus(HashMap<String,ArrayList<String>> ostoskori){
 		this.teoskysely = ostoskori;
 		this.moodi = "teetilaus";
 		this.yhteysHandleri();
 	}
 
+	// rahan siirto
 	public void siirraRahaa(double summa){
 
 		this.inputDouble = summa;
@@ -251,6 +261,7 @@ public class Asiakaskyselyt{
 		this.yhteysHandleri();
 	}
 
+	// ostoskorin tyhjennys
 	public void tyhjennaKori(HashMap<String,ArrayList<String>> ostoskori){
 
 		this.teoskysely = ostoskori;
@@ -377,6 +388,7 @@ public class Asiakaskyselyt{
 		}
 
 	}
+	// uuden käyttäjäID:n luonti
 	private void id() throws SQLException{
 
 		// Luodaan satunnainen luku välillä 1-1000
@@ -396,6 +408,7 @@ public class Asiakaskyselyt{
 		}
 	}
 
+	// Kirjautumiseen liittyvät tietokantatoiminnot
 	private void kirjautuminen() throws SQLException{
 
 		this.preparedStatement = this.connection.prepareStatement(this.kirjautumisStatement);
@@ -412,6 +425,7 @@ public class Asiakaskyselyt{
 
 	}
 
+	// Käyttäjätietojen lisäämiseen liittyvät tietokantatoiminnot
 	private void lisaaKayttajaTiedot() throws SQLException{
 		this.preparedStatement = this.connection.prepareStatement(this.insertKayttaja);
 		// ID on tällä hetkellä tallennettuna returnInt-attribuuttiin
@@ -439,6 +453,7 @@ public class Asiakaskyselyt{
 
 	}
 
+	// Teoshakuun liittyvät tietokantatoiminnot
 	private void teoshaku() throws SQLException{
 		if(this.input1.equals("nimi")){
 			this.preparedStatement = this.connection.prepareStatement(this.haeTeosNimet);
@@ -494,9 +509,10 @@ public class Asiakaskyselyt{
 
 	}
 
+	// Usean hakusanan hakuun liittyvät tietokantatoiminnot
 	public void haeUseillaSanoilla() throws SQLException{
 		this.teoskysely = new HashMap<String,ArrayList<String>>();
-		
+
 		this.preparedStatement = this.connection.prepareStatement(this.input1);
 		System.out.println("metodista");
 		this.resultset = this.preparedStatement.executeQuery();
@@ -523,7 +539,7 @@ public class Asiakaskyselyt{
 			kyselynumero = kyselynumero +1;
 		}
 	}
-
+	// tarkastetaan onko käyttäjätunnus jo käytössä toisella asiakkaalla
 	public void tunnusVarattu() throws SQLException{
 
 		this.preparedStatement = this.connection.prepareStatement(this.tarkastaNimiStatement);
@@ -646,7 +662,9 @@ public class Asiakaskyselyt{
       
       	System.out.println("Tilaus toimitetaan " + toimitusLkm + " erässä. Postikulut ovat yhteensä " + this.resultset.getInt(1) + " rahaa.");
    }
-   
+   	
+
+	// Varuaksien hakuun liittyvät tietokantatoiminnot
 	public void varauksienHaku() throws SQLException{
 
 		this.preparedStatement = this.connection.prepareStatement(this.haeVaraukset);
@@ -719,6 +737,7 @@ public class Asiakaskyselyt{
 		this.preparedStatement.executeUpdate();
 	}
 
+	// Tilauksen perumiseen liittyvät tietokantatoiminnot
 	private void tilauksenPeruutus() throws SQLException{
 
 		this.connection.setAutoCommit(false);
@@ -766,6 +785,7 @@ public class Asiakaskyselyt{
         this.connection.setAutoCommit(true); 
 	}
 
+	// Rahan lisäykseen liittyvät tietokantatoiminnot
 	public void rahanLisays() throws SQLException{
 		this.preparedStatement = this.connection.prepareStatement(this.lisaaRahaa);
 		this.preparedStatement.setDouble(1,inputDouble);

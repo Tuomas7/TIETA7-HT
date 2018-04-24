@@ -1,3 +1,5 @@
+// Superusersylseyt -luokka. Sisältään tietokantarajapinnan adminin kyselyille.
+
 import java.sql.*;
 import java.util.Scanner;
 import java.util.Stack;
@@ -52,6 +54,7 @@ public class SuperuserKyselyt{
 		this.lisaaSijainti = "INSERT INTO keskus.Sijainti VALUES (?,?)";
 	}
 
+  // Uuden tietokannan lisäys keskuskantaan
 	public void lisaaKanta(){
 
 		System.out.print("Syötä tiedostonimi, jossa lisättävän tietokannan tiedot sijaitsevat XML-formaatissa:\n> ");
@@ -134,8 +137,8 @@ public class SuperuserKyselyt{
                		// Lisätään niteen tiedot keskustietokantaan
                		this.preparedStatement = this.connection.prepareStatement(this.lisaaKappale);
                		this.preparedStatement.setInt(1,id);
-					this.preparedStatement.setString(2,isbn);
-					this.preparedStatement.setDouble(3,hinta);
+					         this.preparedStatement.setString(2,isbn);
+					         this.preparedStatement.setDouble(3,hinta);
                		this.preparedStatement.executeUpdate();
                   
                		// Lisätään myös niteen sijaintitiedot
@@ -189,7 +192,7 @@ public class SuperuserKyselyt{
 
 		
 
-
+  // Myyntiraportin palautus, palautta hashmapin, jossa ostotiedot
 	public HashMap<String,ArrayList<String>> tulostaRaportti(){
 
 		this.moodi = "raportti";
@@ -198,6 +201,7 @@ public class SuperuserKyselyt{
 
 	}
 
+  // Teosten luokkatietojen palautus, palauttaa hashmapin, jossa luokkatiedot
 	public HashMap<String,ArrayList<String>> luokkaTiedot(){
 		this.moodi = "luokkatiedot";
 		this.yhteysHandleri();
@@ -259,6 +263,7 @@ public class SuperuserKyselyt{
 		}
 	}
 
+  // Luokkien hintoihin liittyvät kyselyt
 	public void teosLuokat() throws SQLException{
 		this.kyselyTulos = new HashMap<String, ArrayList<String>>();
 		String teosLuokittelu = "SELECT * FROM keskus.hinnatluokittain";
@@ -282,6 +287,7 @@ public class SuperuserKyselyt{
 		}
 	}
 
+  // Myyntiraporttiin liittyvät kyselyt
 	public void myyntiRaportti() throws SQLException{
 		this.kyselyTulos = new HashMap<String, ArrayList<String>>();
 		String myyntiRaportti = "SELECT * FROM keskus.ostotVuodessa";

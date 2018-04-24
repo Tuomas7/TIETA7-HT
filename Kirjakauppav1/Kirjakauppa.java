@@ -1,3 +1,9 @@
+// Tietokantaohjelmointi / harjoitustyö / Kirjakauppa-ohjelma
+// Käyttää luokkia Asiakasistunto, Asiakaskyselyt, Kirjautumisavustaja,
+// Yhteys, Yllapitajaistunto, Yllapitokyselyt, Superuser ja Superuserkyselyt.
+// Tarkempi dokumentaatio erikseen.
+// Tekijät: Tapio Nevalainen & Tuomas Tammela. 
+
 import java.util.Scanner;
 import java.util.Map;
 import java.util.HashMap;
@@ -14,11 +20,13 @@ public class Kirjakauppa{
 
 		boolean kirjautuminen = false;
 		
+		// Luodaan kysely-olio, jonka avulla kirjaudutaan
 		Asiakaskyselyt kysely = new Asiakaskyselyt();
-		// Dummyt
+		
+		// Dummyt kääntämisen helpottamiseksi, ei käytetä tässä
 		Yllapitokyselyt kys = new Yllapitokyselyt(0);
 		SuperuserKyselyt kys2 = new SuperuserKyselyt();
-		//Yllapitokyselyt kyselyt = new Yllapitokyselyt(0);
+		Yllapitokyselyt kyselyt = new Yllapitokyselyt(0);
 
 		// "Clear screen"
 		System.out.print("\033[H\033[2J");
@@ -29,7 +37,7 @@ public class Kirjakauppa{
 
 		String syote = "";	
 		
-		// Main looppi
+		// Main looppi // käyttöliittymän runki
 		while(!syote.equals("5")){
 
 			System.out.println("[ 1 ] Kirjaudu sisään (Asiakas)");
@@ -47,6 +55,7 @@ public class Kirjakauppa{
 				System.out.println("Virheellinen syöte!\n");
 			}	
 
+			// asiakkaan sisäänkirjaus
 			if(syote.equals("1")){
 				// "Clear screen"
 				//System.out.print("\033[H\033[2J");
@@ -61,7 +70,7 @@ public class Kirjakauppa{
 					sisaankirjausKayttaja(istunto, lukija);
 				}
 
-			
+			// ylläpitäjän sisäänkirjaus
 			}else if(syote.equals("2")){
 				//System.out.print("\033[H\033[2J");
 				Kirjautumisavustaja avustaja = new Kirjautumisavustaja("Ylläpitäjä");
@@ -78,7 +87,7 @@ public class Kirjakauppa{
 				}
 			
 			
-					
+			// asiakkaan rekisteröinti	
 			}else if(syote.equals("3")){
 				Kirjautumisavustaja avustaja = new Kirjautumisavustaja("Asiakas");
 			
@@ -87,7 +96,8 @@ public class Kirjakauppa{
 				//if(kirjautuminen){
 
 				//}
-				
+			
+			// pääadminin sisäänkirjaus
 			}else if(syote.equals("4")){
 				Kirjautumisavustaja avustaja = new Kirjautumisavustaja("Superuser");
 				Superuser istunto = null;
@@ -111,6 +121,7 @@ public class Kirjakauppa{
 		System.out.println("\nTervetuloa uudelleen!\n");	
 	}
 
+	// Pääadminin käyttöliittymä
 	public static void sisaankirjausSuperuser(Superuser istunto, Scanner lukija){
 		
 		String syote = "";
@@ -140,8 +151,7 @@ public class Kirjakauppa{
 
 	// Käyttöliittymä sisäänkirjautuneelle ylläpitäjälle
 	// @param lukija // Scanner-olio
-	// @param istunto // Sessio-olio
-	
+	// @param istunto // Ylläpitoistunto-olio
 	public static void sisaankirjausYllapito(Yllapitajaistunto istunto, Scanner lukija){
 
 		//istunto.haeDivariID();
@@ -177,8 +187,7 @@ public class Kirjakauppa{
 
 	// Käyttöliittymä sisäänkirjautuneelle asiakkaalle
 	// @param lukija // Scanner-olio
-	// @param istunto // Sessio-olio
-
+	// @param istunto // Asiakasistunto olio
 	public static void sisaankirjausKayttaja(Asiakasistunto istunto, Scanner lukija){
 
 		String syote ="";
@@ -221,13 +230,12 @@ public class Kirjakauppa{
 		
 	}
 
+	// Ostoskorin käyttöliittymä
 	public static void ostoskori(Asiakasistunto istunto, Scanner lukija){
 
-		
 
 		String syote = "";
-		
-		
+				
 
 		System.out.print("\n>");
 		while(!(syote.equals("3"))){
@@ -255,36 +263,29 @@ public class Kirjakauppa{
 	
 	}
 
+	// Asiakasprofiilin käyttöliittymä
 	public static void profiili(Asiakasistunto istunto, Scanner lukija){
-
-		
 		System.out.println();
 		String syote = "";
 		
-		
-
-		while(!(syote.equals("3"))){
+		while(!(syote.equals("2"))){
 			System.out.println("------------");
 			System.out.println("| Profiili |");
 			System.out.println("------------");
 			istunto.tulostaTiedot();
 
-			System.out.println("[ 1 ] Muokkaa tietoja");
-			System.out.println("[ 2 ] Lisää rahaa tilille");
-			System.out.println("[ 3 ] Palaa päävalikkoon");
+	
+			System.out.println("[ 1 ] Lisää rahaa tilille");
+			System.out.println("[ 2 ] Palaa päävalikkoon");
 
 			System.out.print("\n>");
 
 			syote=lukija.nextLine();
-			if(!(syote.equals("1") || syote.equals("2")|| syote.equals("3"))){
+			if(!(syote.equals("1") || syote.equals("2")){
 				System.out.println("Tuntematon komento!");
 			}	
 			if(syote.equals("1")){
-				//istunto.tilaaTuotteet();
-			}else if(syote.equals("2")){
-				istunto.lisaaRahaa();
-			}else if(syote.equals("3")){
-				
+				istunto.lisaaRahaa()
 			}
 
 		}
@@ -295,7 +296,7 @@ public class Kirjakauppa{
 	
 
 
-
+	// "Bannerin" tulostus
 	public static void printBanner(){
 		System.out.println("       _      _       _                                  __  __");
 		

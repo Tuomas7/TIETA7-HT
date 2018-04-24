@@ -1,3 +1,5 @@
+// Superuser - luokka. Mallintaa tietokannan pääadminin istuntoa ja toimintoja.
+
 import java.util.Scanner;
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -18,7 +20,7 @@ public class Superuser{
 
 	}
 
-
+	// Myyntiraportin tulostus
 	public void myyntiRaportti(){
 		this.kyselyTulos = kyselyt.tulostaRaportti();
 
@@ -38,10 +40,12 @@ public class Superuser{
 
 	}
 
+	// Uuden divarin tietojen lisääminen keskustietokantaan
 	public void lisaaDivariKantaan(){
 		kyselyt.lisaaKanta();
 	}
 
+	// Raportti myynnissä olevien teoten hinnoista luokittain
 	public void luokkaRaportti(){
 		this.kyselyTulos = kyselyt.luokkaTiedot();
 
