@@ -136,14 +136,14 @@ public class Asiakasistunto{
 
 		}else{
 			// Tulostetaan muotoiltuna teosten nimet, tekijat, painot ja hinnat
-			System.out.println("\n--------------------------------------------------------------------------------");
-			System.out.format("%30s%30s%10s%10s\n","Nimi","Tekija","Paino","Hinta");
-			System.out.println("--------------------------------------------------------------------------------");
+			System.out.println("\n---------------------------------------------------------------------------------------------------------");
+			System.out.format("%50s%40s%10s%10s\n","Nimi","Tekija","Paino","Hinta");
+			System.out.println("---------------------------------------------------------------------------------------------------------");
 
 			for(int i = 1 ; i < this.ostoskori.size()+1; i++){
 					
-				System.out.format("%30s",this.ostoskori.get(String.valueOf(i)).get(2));
-				System.out.format("%30s",this.ostoskori.get(String.valueOf(i)).get(3));
+				System.out.format("%50s",this.ostoskori.get(String.valueOf(i)).get(2));
+				System.out.format("%40s",this.ostoskori.get(String.valueOf(i)).get(3));
 				System.out.format("%10s",this.ostoskori.get(String.valueOf(i)).get(7));
 				System.out.format("%10s",this.ostoskori.get(String.valueOf(i)).get(8));
 				System.out.println();

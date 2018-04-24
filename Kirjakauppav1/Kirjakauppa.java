@@ -80,10 +80,10 @@ public class Kirjakauppa{
 
 
 				if(istunto !=null){
-					System.out.println("onnistui");
+					
 					sisaankirjausYllapito(istunto,lukija);
 				}else{
-					System.out.println("ei");
+					System.out.println("Kirjautuminen ei onnistunut.");
 				}
 			
 			
@@ -157,29 +157,24 @@ public class Kirjakauppa{
 		//istunto.haeDivariID();
 		istunto.tulosta();
 		String syote ="";
-		while(!syote.equals("4")){
+		while(!syote.equals("3")){
 			System.out.println("------------");
 			System.out.println("| Ylläpito |");
 			System.out.println("------------");
 			System.out.println("Olet kirjautuneena ylläpitäjänä:\n");
 			System.out.println("[ 1 ] Lisää teoksia");
-			System.out.println("[ 2 ] Näytä myynnissä olevat teokset");
 			System.out.println("[ 2 ] Päivitä keskustietokanta");
-			System.out.println("[ 3 ] Jotain muuta");
-			System.out.println("[ 4 ] Kirjaudu ulos");
+			System.out.println("[ 3 ] Kirjaudu ulos");
 			System.out.print("\n> ");
 
 			syote = lukija.nextLine();
 
 			if(syote.equals("1")){
-				
 				istunto.lisaaTeos();
 				
 			}else if(syote.equals("2")){
 				istunto.paivitaKeskus();
 
-			}else if(syote.equals("3")){
-				//ostoskori(istunto, lukija);
 			}
 		}		
 		System.out.println("Kirjauduit ulos.");
@@ -217,12 +212,7 @@ public class Kirjakauppa{
 			}else if(syote.equals("3")){
 				ostoskori(istunto, lukija);
 				
-				/*
-			}else if(syote.equals("5")){
-				istunto.tulostaHistoria();
-
 			
-				*/
 			}
 		
 		}
@@ -281,11 +271,11 @@ public class Kirjakauppa{
 			System.out.print("\n>");
 
 			syote=lukija.nextLine();
-			if(!(syote.equals("1") || syote.equals("2")){
+			if(!(syote.equals("1") || syote.equals("2"))){
 				System.out.println("Tuntematon komento!");
 			}	
 			if(syote.equals("1")){
-				istunto.lisaaRahaa()
+				istunto.lisaaRahaa();
 			}
 
 		}

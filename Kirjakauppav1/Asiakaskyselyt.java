@@ -429,7 +429,7 @@ public class Asiakaskyselyt{
 	private void lisaaKayttajaTiedot() throws SQLException{
 		this.preparedStatement = this.connection.prepareStatement(this.insertKayttaja);
 		// ID on tällä hetkellä tallennettuna returnInt-attribuuttiin
-		System.out.println(this.mapInput);
+		
 		this.preparedStatement.setInt(1,this.returnInt);
 		this.preparedStatement.setString(2,this.mapInput.get("tunnus"));
 		this.preparedStatement.setString(3,this.mapInput.get("salasana"));
@@ -740,7 +740,7 @@ public class Asiakaskyselyt{
 	// Tilauksen perumiseen liittyvät tietokantatoiminnot
 	private void tilauksenPeruutus() throws SQLException{
 
-		this.connection.setAutoCommit(false);
+		//this.connection.setAutoCommit(false);
 
 		this.preparedStatement = this.connection.prepareStatement(this.tilausPeruutus);
         this.preparedStatement.setInt(1,this.asiakasID);
@@ -748,7 +748,7 @@ public class Asiakaskyselyt{
 
 		// Käydään ostoskorin teokset läpi
 		for(int i = 1; i < this.teoskysely.size()+1;i++){
-			System.out.println("jotain");
+			
 			// Muunna int Merkkijonoksi, jolla päästään käsiksi mapin avaimiin.
 			String indeksi = String.valueOf(i);
 
@@ -781,8 +781,8 @@ public class Asiakaskyselyt{
 
             
 		}
-		this.connection.commit();
-        this.connection.setAutoCommit(true); 
+		//this.connection.commit();
+        //this.connection.setAutoCommit(true); 
 	}
 
 	// Rahan lisäykseen liittyvät tietokantatoiminnot
