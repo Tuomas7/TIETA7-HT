@@ -17,7 +17,7 @@ public class Yllapitajaistunto{
 
 
 	public Yllapitajaistunto(int id){
-		System.out.println("dfds");
+		
 		this.kayttajaID = id;
 		this.lukija = new Scanner(System.in);
 		//System.out.println(this.kayttajaID);
@@ -28,8 +28,14 @@ public class Yllapitajaistunto{
 
 
 	public void tulosta(){
-		System.out.println(this.divariID);
-		System.out.println(this.divariKeskusKannassa);
+		System.out.println("Olet kirjautuneena Divarin D"+this.divariID+ " ylläpitäjänä.");
+		if(this.divariKeskusKannassa){
+			System.out.println("Divari on liittynyt keskustietokantaan.");
+		}else{
+			System.out.println("Divari ei ole liittynyt keskustietokantaan.");
+		}
+		//System.out.println(this.divariID);
+		//System.out.println(this.divariKeskusKannassa);
 	}
 
 	public boolean onkoKannassa(){
