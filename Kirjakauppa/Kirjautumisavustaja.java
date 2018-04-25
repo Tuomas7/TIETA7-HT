@@ -1,4 +1,4 @@
-// kirjautumisavustaja-luokka. Käytetään käyttäjän sisäänkirjautumisessa.
+// Kirjautumisavustajaluokka. Käytetään käyttäjän sisäänkirjautumisessa.
 
 import java.util.Scanner;
 import java.util.HashMap;
@@ -10,8 +10,7 @@ public class Kirjautumisavustaja{
 
 	private Scanner lukija;
 	private Asiakaskyselyt kysely;
-	private String rooli;
-	//private HashMap<String,ArrayList<String>> 
+	private String rooli; 
 
 	public Kirjautumisavustaja(String rooli){
 		this.lukija = new Scanner(System.in);
@@ -23,7 +22,6 @@ public class Kirjautumisavustaja{
 	// @param kyselyt // Asiakaskyselyt-olio
 	// @param rooli // merkkijono kayttajan roolista ("Asiakas" tai "Ylläpitäjä")
 	// @return 
-
 	public Asiakasistunto kirjaudu(){
 
 		String tunnus ="";
@@ -32,22 +30,20 @@ public class Kirjautumisavustaja{
 
 		System.out.println("Kirjaudutaan sisään:");
 		System.out.print("Syötä käyttäjätunnus:\n> ");
-
 		tunnus = this.lukija.nextLine();
-		char [] salasana;
 
-		
+		char [] salasana;
 		salasana = console.readPassword("Anna salasana:\n> ");
 
 		StringBuilder strBuilder = new StringBuilder();
+
 		for (int i = 0; i < salasana.length; i++) {
-		   	strBuilder.append(salasana[i]);
-			}
+		   strBuilder.append(salasana[i]);
+		}
+
 		String password = strBuilder.toString();
 		Arrays.fill(salasana,' ');
-		
-		//System.out.println(password);
-		
+
 		int id = this.kysely.tarkastaKirjautuminen(tunnus, password, this.rooli);
 
 		if(id == 0){
@@ -55,7 +51,8 @@ public class Kirjautumisavustaja{
 		}else{
 			istunto = new Asiakasistunto(id);
 		}
-		return istunto;	
+
+		return istunto;
 	}
 
 	public Yllapitajaistunto kirjauduyp(){
@@ -66,22 +63,20 @@ public class Kirjautumisavustaja{
 
 		System.out.println("Kirjaudutaan sisään ylläpitäjänä:");
 		System.out.print("Syötä käyttäjätunnus:\n> ");
-
 		tunnus = this.lukija.nextLine();
-		char [] salasana;
 
-		
+		char [] salasana;
 		salasana = console.readPassword("Anna salasana:\n> ");
 
 		StringBuilder strBuilder = new StringBuilder();
+
 		for (int i = 0; i < salasana.length; i++) {
-		   	strBuilder.append(salasana[i]);
-			}
+		   strBuilder.append(salasana[i]);
+		}
+
 		String password = strBuilder.toString();
 		Arrays.fill(salasana,' ');
-		
-		//System.out.println(password);
-		
+
 		int id = this.kysely.tarkastaKirjautuminen(tunnus, password, this.rooli);
 
 		if(id == 0){
@@ -89,40 +84,40 @@ public class Kirjautumisavustaja{
 		}else{
 			istunto = new Yllapitajaistunto(id);
 		}
+
 		return istunto;	
 	}
 
-	public Superuser kirjauduSU(){
+	public Superuseristunto kirjauduSU(){
 
 		String tunnus ="";
-		Superuser istunto = null;
+		Superuseristunto istunto = null;
 		Console console = System.console() ;
 
 		System.out.println("Kirjaudutaan sisään keskustietokannan pääkäyttäjänä:");
 		System.out.print("Syötä käyttäjätunnus:\n> ");
-
 		tunnus = this.lukija.nextLine();
-		char [] salasana;
 
-		
+		char [] salasana;
 		salasana = console.readPassword("Anna salasana:\n> ");
 
 		StringBuilder strBuilder = new StringBuilder();
+
 		for (int i = 0; i < salasana.length; i++) {
-		   	strBuilder.append(salasana[i]);
-			}
+		   strBuilder.append(salasana[i]);
+		}
+
 		String password = strBuilder.toString();
 		Arrays.fill(salasana,' ');
-		
-		//System.out.println(password);
-		
+
 		int id = this.kysely.tarkastaKirjautuminen(tunnus, password, this.rooli);
 
 		if(id == 0){
 			System.out.println("Käyttäjätunnus tai salasana väärin.");
 		}else{
-			istunto = new Superuser(id);
+			istunto = new Superuseristunto(id);
 		}
+
 		return istunto;
 	}
 
@@ -130,7 +125,6 @@ public class Kirjautumisavustaja{
 	public boolean rekisteroidy(){
 
 		Console console = System.console();
-		
 		boolean tiedotOK = false;
 
 		// Talllennetaan syötettävät tiedot hashmappiin
@@ -157,7 +151,7 @@ public class Kirjautumisavustaja{
 
 			// Lisätään nimi mappiin
 			tiedot.put("etunimi",etunimi);
-			
+
 			String sukunimi ="";
 			boolean sukunimitarkistus = false;
 
@@ -167,11 +161,10 @@ public class Kirjautumisavustaja{
 				sukunimi = lukija.nextLine();
 				sukunimitarkistus = this.tarkastaPituus(sukunimi);
 			}
-			
+
 			tiedot.put("sukunimi",sukunimi);
 
 			String osoite = "";
-
 			boolean osoitetarkistus = false;
 
 			// Tarkistetaan, ettei syötetty tyhjää arvoa
@@ -182,10 +175,10 @@ public class Kirjautumisavustaja{
 			}
 
 			tiedot.put("osoite",osoite);
-			
 
 			System.out.print("Sähköposti:\n> ");
 			String sahkoposti = lukija.nextLine();
+
 			if(sahkoposti.length()>0){
 				tiedot.put("sahkoposti",sahkoposti);
 			}else{
@@ -194,6 +187,7 @@ public class Kirjautumisavustaja{
 
 			System.out.print("Puhelin:\n> ");
 			String puhelin = lukija.nextLine();
+
 			if(puhelin.length()>0){
 				tiedot.put("puhelin",puhelin);
 			}else{
@@ -203,15 +197,17 @@ public class Kirjautumisavustaja{
 			System.out.println("Luodaan käyttäjätunnus seuraavin tiedoin.\n");
 			System.out.println("Nimi: "+etunimi + " " + sukunimi);
 			System.out.println("Osoite: "+osoite);
+
 			if(sahkoposti.length()>0){
 				System.out.println("Sähköposti: "+sahkoposti);
 			}
 			if(puhelin.length()>0){
 				System.out.println("Puhelin: "+puhelin+"\n");
 			}
-			
+
 			// Varmistetaan että tiedot oikein
 			String varmistus = "";
+
 			while(!(varmistus.equals("E") || varmistus.equals("K"))){
 				System.out.print("Tarkista tiedot. Jos tiedot ovat oikein, jatketaan tunnuksen luomiseen. (K/E)\n\n> ");
 				varmistus = lukija.nextLine(); 
@@ -223,11 +219,12 @@ public class Kirjautumisavustaja{
 				System.out.println("Luodaan käyttäjätunnus ja salasana:\n");
 			}
 
-			// Tähän käyttäjätunnuksen luonti ja tarkistus, että tunnusta ei löydy kannasta
+			// Käyttäjätunnuksen luonti ja tarkistus, että tunnusta ei löydy kannasta
 			boolean tunnustarkistus = false;
 			String ktunnus= "";
 
 			while(!tunnustarkistus){
+
 				System.out.print("Käyttäjätunnus:\n> ");
 				ktunnus = lukija.nextLine();
 
@@ -242,35 +239,33 @@ public class Kirjautumisavustaja{
 				if(!tunnustarkistus){
 					System.out.print("Käyttäjätunnus on varattu, valitse toinen käyttäjätunnus:\n> ");
 				}
-				
-
 			}
-			
-		
-			// Tähän salasanat, tarkistetaan että ne mätsää, ja jotain muuta? pituus?
+
+			// Tähän salasanat, tarkistetaan että ne mätsää
 			boolean salasanatarkistus = false;
 			char [] password;
 
 			while(!salasanatarkistus){
-				password = console.readPassword("Valitse salasana (pituus vähintään viisi merkkiä):\n> ");
 
+				password = console.readPassword("Valitse salasana (pituus vähintään viisi merkkiä):\n> ");
 				StringBuilder strBuilder = new StringBuilder();
+
 				for (int i = 0; i < password.length; i++) {
-		   			strBuilder.append(password[i]);
-					}
+		   		strBuilder.append(password[i]);
+				}
+
 				String pw1 = strBuilder.toString();
 				Arrays.fill(password,' ');
-				//System.out.println(pw1);
 
 				password = console.readPassword("Syötä salasana uudelleen: \n> ");
-				
 				strBuilder = new StringBuilder();
+
 				for (int i = 0; i < password.length; i++) {
-		   			strBuilder.append(password[i]);
-					}
+		   		strBuilder.append(password[i]);
+				}
+
 				String pw2 = strBuilder.toString();
 				Arrays.fill(password,' ');
-				//System.out.println(pw2);
 
 				if(salasanaTarkistus(pw1,pw2)){
 					salasanatarkistus = true;
@@ -287,28 +282,29 @@ public class Kirjautumisavustaja{
 				System.out.println("Voit nyt kirjautua sisään.");
 				return true;
 			}
-			
+
 			return false;			
 		}
-		
 	}
 
 	// Metodi tarkistaa, ettei syötetä tyhjiä arvoja
 	public boolean tarkastaPituus(String tieto){
+
 		if(tieto.length()>0){
 			return true;
 		}
+
 		System.out.println("Syötit tyhjän arvon!");
 		return false;
-
 	}
 
-	// Metodi tarkistaa täsmäävätkö syötetyt salasanat
+	// Metodi tarkistaa, täsmäävätkö syötetyt salasanat
 	public boolean salasanaTarkistus(String pw1, String pw2){
-		
+
 		if(pw1.length()>6 && pw2.length()>6 && pw1.equals(pw2)){
 			return true;
 		}
+
 		return false;
 	}
 }

@@ -1,27 +1,25 @@
-// Superuser - luokka. Mallintaa tietokannan pääadminin istuntoa ja toimintoja.
+// Superuseristuntoluokka. Mallintaa tietokannan pääadminin istuntoa ja toimintoja.
 
 import java.util.Scanner;
 import java.util.HashMap;
 import java.util.ArrayList;
 
-
-public class Superuser{
+public class Superuseristunto {
 
 	private Scanner lukija;
 	private int id;
 	private SuperuserKyselyt kyselyt;
 	private HashMap<String,ArrayList<String>> kyselyTulos;
 
-
-	public Superuser(int id){
+	public Superuseristunto(int id){
 		this.id = id;
 		lukija = new Scanner(System.in);
 		this.kyselyt = new SuperuserKyselyt();
-
 	}
 
 	// Myyntiraportin tulostus
 	public void myyntiRaportti(){
+
 		this.kyselyTulos = kyselyt.tulostaRaportti();
 
 		System.out.println("\n----------------------------------------------------------------------");
@@ -35,18 +33,16 @@ public class Superuser{
 			System.out.println();
 		}
 		System.out.println("\n");
-		
-		
-
 	}
 
 	// Uuden divarin tietojen lisääminen keskustietokantaan
 	public void lisaaDivariKantaan(){
-		kyselyt.lisaaKanta();
+		kyselyt.kannanLisays();
 	}
 
 	// Raportti myynnissä olevien teoten hinnoista luokittain
 	public void luokkaRaportti(){
+
 		this.kyselyTulos = kyselyt.luokkaTiedot();
 
 		System.out.println("\n----------------------------------------------------------------------");
@@ -61,7 +57,4 @@ public class Superuser{
 		}
 		System.out.println("\n");
 	}
-
-
-
 }

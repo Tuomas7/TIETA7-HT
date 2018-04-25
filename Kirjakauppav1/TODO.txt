@@ -1,4 +1,0 @@
-﻿- Raportit
-
-- T8: lokaalin divarin tietojen siirto superuserina (Tehty, täytyy vain siirtää ylläpitoluokkiin)
-
