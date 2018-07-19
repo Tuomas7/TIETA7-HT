@@ -27,9 +27,9 @@ public class Yhteys{
    	public Yhteys(){
    		this.yhteys = null;
    		this.protokolla = "jdbc:postgresql:";
-   		this.kayttaja = "tt422098";
-   		this.salasana = "Salasana123";
-   		this.url = this.protokolla + "//" + "dbstud2.sis.uta.fi" + ":5432/" + "tt422098";
+   		this.kayttaja = "harjoituskayttaja";
+   		this.salasana = "salasana";
+   		this.url = this.protokolla + "//" + "localhost" + ":5432/" + "kirjakauppa";
    	}
 
    	public Connection uusiYhteys() throws SQLException{

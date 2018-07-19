@@ -1,33 +1,22 @@
-############################ Skeemojen asetukset ja luonnit
+--########################################## Käyttäjän ja tietokannan luonti (Suoritettava yksi kerrallaan)
 
 
-create schema keskus;
+-- CREATE USER harjoituskayttaja WITH PASSWORD 'salasana';
+-- CREATE DATABASE Kirjakauppa WITH OWNER harjoituskayttaja;
+
+
+--########################################## Skeemojen luonnit ja alustukset
+
+
+CREATE SCHEMA keskus;
 SET search_path to keskus;
 SHOW SEARCH_PATH;
 
-
-########################################## Mahdollisten vanhojen taulujen poisto
-
-
-DROP table keskus.yllapitaja;
-DROP table keskus.sijainti;
-DROP table keskus.tilaus;
-DROP table keskus.teoskappale;
-DROP table keskus.teos;
-DROP table keskus.divari;
-DROP table keskus.asiakas;
-DROP table keskus.kayttaja;
-DROP table keskus.postikulut;
-DROP table keskus.toimitus;
-
-DROP table D1.teoskappale;
-DROP table D1.teos;
-
-DROP table D3.teoskappale;
-DROP table D3.teos;
+CREATE SCHEMA D1;
+CREATE SCHEMA D3;
 
 
-########################################## Keskuksen taulujen luonti
+--########################################## Keskuksen taulujen luonti
 
 
 CREATE TABLE keskus.Divari (
@@ -126,24 +115,21 @@ CREATE TABLE keskus.Toimitus (
 );
 
 
-GRANT ALL PRIVILEGES ON table keskus.divari TO postgres;
-GRANT ALL PRIVILEGES ON table keskus.asiakas TO postgres;
-GRANT ALL PRIVILEGES ON table keskus.kayttaja TO postgres;
-GRANT ALL PRIVILEGES ON table keskus.teos TO postgres;
-GRANT ALL PRIVILEGES ON table keskus.teoskappale TO postgres;
-GRANT ALL PRIVILEGES ON table keskus.tilaus TO postgres;
-GRANT ALL PRIVILEGES ON table keskus.postikulut TO postgres;
-GRANT ALL PRIVILEGES ON table keskus.toimitus TO postgres;
-GRANT ALL PRIVILEGES ON table keskus.sijainti TO postgres;
-GRANT ALL PRIVILEGES ON table keskus.yllapitaja TO postgres;
-
-GRANT ALL PRIVILEGES ON SCHEMA keskus TO GROUP postgres;
-
-
-########################################## Divarin D1 taulujen luonti
+GRANT ALL PRIVILEGES ON TABLE keskus.divari TO harjoituskayttaja;
+GRANT ALL PRIVILEGES ON TABLE keskus.asiakas TO harjoituskayttaja;
+GRANT ALL PRIVILEGES ON TABLE keskus.kayttaja TO harjoituskayttaja;
+GRANT ALL PRIVILEGES ON TABLE keskus.teos TO harjoituskayttaja;
+GRANT ALL PRIVILEGES ON TABLE keskus.teoskappale TO harjoituskayttaja;
+GRANT ALL PRIVILEGES ON TABLE keskus.tilaus TO harjoituskayttaja;
+GRANT ALL PRIVILEGES ON TABLE keskus.postikulut TO harjoituskayttaja;
+GRANT ALL PRIVILEGES ON TABLE keskus.toimitus TO harjoituskayttaja;
+GRANT ALL PRIVILEGES ON TABLE keskus.sijainti TO harjoituskayttaja;
+GRANT ALL PRIVILEGES ON TABLE keskus.yllapitaja TO harjoituskayttaja;
+GRANT ALL PRIVILEGES ON SCHEMA keskus TO GROUP harjoituskayttaja;
 
 
-create schema D1;
+--########################################## Divarin D1 taulujen luonti
+
 
 CREATE TABLE D1.Teos (
 	ISBN varchar(13) NOT NULL,
@@ -163,20 +149,19 @@ CREATE TABLE D1.TeosKappale (
 	Ostohinta decimal(10,2) DEFAULT 0.00,
 	MyyntiPvm date,
 	Vapaus varchar(10) DEFAULT 'Vapaa',
-   Paivitetty boolean DEFAULT false;
+   Paivitetty boolean DEFAULT false,
 	PRIMARY KEY (KappaleID),
 	FOREIGN KEY (ISBN) REFERENCES D1.Teos(ISBN)
 );
 
-GRANT ALL PRIVILEGES ON SCHEMA D1 TO GROUP postgres;
-GRANT ALL PRIVILEGES ON table D1.teos TO postgres;
-GRANT ALL PRIVILEGES ON table D1.teoskappale TO postgres;
+
+GRANT ALL PRIVILEGES ON TABLE D1.teos TO harjoituskayttaja;
+GRANT ALL PRIVILEGES ON TABLE D1.teoskappale TO harjoituskayttaja;
+GRANT ALL PRIVILEGES ON SCHEMA D1 TO GROUP harjoituskayttaja;
 
 
-########################################## Divarin D3 taulujen luonti
+--########################################## Divarin D3 taulujen luonti
 
-
-create schema D3;
 
 CREATE TABLE D3.Teos (
 	ISBN varchar(13) NOT NULL,
@@ -200,12 +185,13 @@ CREATE TABLE D3.TeosKappale (
 	FOREIGN KEY (ISBN) REFERENCES D3.Teos(ISBN)
 );
 
-GRANT ALL PRIVILEGES ON table D3.teos TO postgres;
-GRANT ALL PRIVILEGES ON table D3.teoskappale TO postgres;
-GRANT ALL PRIVILEGES ON SCHEMA D3 TO GROUP postgres;
+
+GRANT ALL PRIVILEGES ON TABLE D3.teos TO harjoituskayttaja;
+GRANT ALL PRIVILEGES ON TABLE D3.teoskappale TO harjoituskayttaja;
+GRANT ALL PRIVILEGES ON SCHEMA D3 TO GROUP harjoituskayttaja;
 
 
-########################################## Triggerin lisäys (päivittää divariin D3 lisättävät kappaleet keskustietokantaan)
+--########################################## Triggerin lisäys (päivittää divariin D3 lisättävät kappaleet keskustietokantaan)
 
 
 CREATE OR REPLACE FUNCTION keskuspaivitys() RETURNS trigger AS $keskuspaivitys$
@@ -225,7 +211,7 @@ CREATE TRIGGER keskuspaivitys AFTER INSERT ON D3.TeosKappale
 FOR EACH ROW EXECUTE PROCEDURE keskuspaivitys();
 
 
-########################################## Näkymien (raporttien) luontilauseet
+--########################################## Näkymien (raporttien) luontilauseet
 
 
 CREATE VIEW hinnatLuokittain AS 
@@ -236,6 +222,7 @@ CREATE VIEW hinnatLuokittain AS
    ORDER BY kokonaishinta;
    
 CREATE VIEW ostotVuodessa AS 
+
    SELECT etunimi,sukunimi, count(kappaleID) AS ostot 
    FROM keskus.asiakas NATURAL JOIN keskus.tilaus NATURAL JOIN keskus.teosKappale 
    WHERE (myyntipvm + interval '12 months') > current_date 
@@ -247,6 +234,19 @@ GRANT ALL PRIVILEGES ON table keskus.hinnatLuokittain TO testuser;
 GRANT ALL PRIVILEGES ON table keskus.ostotVuodessa TO testuser;
 
 ########################################## Keskusdivarin tietojen asetus
+=======
+   SELECT etunimi, sukunimi, count(kappaleID) AS ostot 
+   FROM keskus.asiakas NATURAL JOIN keskus.tilaus NATURAL JOIN keskus.teosKappale 
+   WHERE (myyntipvm + interval '12 months') > current_date 
+   GROUP BY etunimi, sukunimi
+   ORDER BY ostot DESC;
+
+
+GRANT ALL PRIVILEGES ON hinnatLuokittain TO harjoituskayttaja;
+GRANT ALL PRIVILEGES ON ostotVuodessa TO harjoituskayttaja;
+   
+--########################################## Keskusdivarin tietojen asetus
+
 
 
 INSERT INTO keskus.divari VALUES('1','Lassen Lehti','Lehtikatu 31, Tampere','www.lassenlehti.fi',1);
@@ -366,7 +366,7 @@ INSERT INTO keskus.postikulut VALUES('1000', '8.40');
 INSERT INTO keskus.postikulut VALUES('2000', '14.00');
 
 
-########################################## Divarin D1 tietojen asetus
+--########################################## Divarin D1 tietojen asetus
 
 
 INSERT INTO d1.teos VALUES('9155430674','Elektran tytär','Madeleine Brent','1986','romaani','romantiikka','1467');
@@ -388,7 +388,7 @@ INSERT INTO d1.teoskappale VALUES('11','9789510393741','12.99','6.00',null,'Vapa
 INSERT INTO d1.teoskappale VALUES('12','9156381451','15.00','7.00',null,'Vapaa');
 
 
-########################################## Divarin D3 tietojen asetus (Siirtyvät automaattisesti keskustietokantaan triggerin kautta)
+--########################################## Divarin D3 tietojen asetus (Siirtyvät automaattisesti keskustietokantaan triggerin kautta)
 
 
 INSERT INTO d3.teos VALUES('9519201785','Friikkilän pojat Mexicossa','Shelton Gilbert','1989','sarjakuva','huumori','198');
@@ -402,41 +402,4 @@ INSERT INTO d3.teoskappale VALUES('5','9519201785','17.99','9.00',null,'Vapaa');
 INSERT INTO d3.teoskappale VALUES('6','9789510396230','14.30','7.00',null,'Vapaa');
 
 
-########################################## Relaatioiden tyhjennys testausta varten
-
-
-DELETE FROM keskus.yllapitaja;
-DELETE FROM keskus.sijainti;
-DELETE FROM keskus.tilaus;
-DELETE FROM keskus.postikulut;
-DELETE FROM keskus.toimitus;
-DELETE FROM keskus.teoskappale;
-DELETE FROM keskus.teos;
-DELETE FROM keskus.asiakas;
-DELETE FROM keskus.kayttaja;
-DELETE FORM keskus.divari;
-
-DELETE FROM D1.teoskappale;
-DELETE FROM D1.teos;
-
-DELETE FROM D3.teoskappale;
-DELETE FROM D3.teos;
-
-# Lokaalia testauta varten
-#############################
-
-
-GRANT ALL PRIVILEGES ON table keskus.divari TO testuser;
-GRANT ALL PRIVILEGES ON table keskus.asiakas TO testuser;
-GRANT ALL PRIVILEGES ON table keskus.kayttaja TO testuser;
-GRANT ALL PRIVILEGES ON table keskus.teos TO testuser;
-GRANT ALL PRIVILEGES ON table keskus.teoskappale TO testuser;
-GRANT ALL PRIVILEGES ON table keskus.tilaus TO testuser;
-GRANT ALL PRIVILEGES ON table keskus.postikulut TO testuser;
-GRANT ALL PRIVILEGES ON table keskus.toimitus TO testuser;
-GRANT ALL PRIVILEGES ON table keskus.sijainti TO testuser;
-GRANT ALL PRIVILEGES ON table keskus.yllapitaja TO testuser;
-GRANT ALL PRIVILEGES ON table keskus.postikulut TO testuser;
-=======
-##########################################
-
+--##########################################
