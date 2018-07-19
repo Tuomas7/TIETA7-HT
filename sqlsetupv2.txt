@@ -236,12 +236,15 @@ CREATE VIEW hinnatLuokittain AS
    ORDER BY kokonaishinta;
    
 CREATE VIEW ostotVuodessa AS 
-   SELECT etunimi, count(kappaleID) AS ostot 
+   SELECT etunimi,sukunimi, count(kappaleID) AS ostot 
    FROM keskus.asiakas NATURAL JOIN keskus.tilaus NATURAL JOIN keskus.teosKappale 
    WHERE (myyntipvm + interval '12 months') > current_date 
-   GROUP BY etunimi 
+   GROUP BY etunimi,sukunimi 
    ORDER BY ostot DESC;
 
+
+GRANT ALL PRIVILEGES ON table keskus.hinnatLuokittain TO testuser;
+GRANT ALL PRIVILEGES ON table keskus.ostotVuodessa TO testuser;
 
 ########################################## Keskusdivarin tietojen asetus
 
